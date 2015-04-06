@@ -1,0 +1,57 @@
+package database
+
+import (
+	"fmt"
+)
+
+type DBPool struct {
+	driver     string
+	connString string
+	poolSize   int
+	dbQueue    chan *Database
+}
+
+func CreateDBPool(driver string, ip string, port int, name string, id string, pw string, poolSize int) *DBPool {
+	var connString string
+	switch driver {
+	case "mssql":
+		connString = fmt.Sprintf("Server=%s;Port=%d;Database=%s;User Id=%s;Password=%s", ip, port, name, id, pw)
+	case "mysql":
+		connString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", id, pw, ip, port, name)
+	case "mymysql":
+		connString = fmt.Sprintf("tcp:%s:%d*%s/%s/%s", ip, port, name, id, pw)
+	default:
+		panic("Unsupported driver (by ip) : " + driver)
+	}
+	return CreateDBPoolByConnString(driver, connString, poolSize)
+}
+
+func CreateDBPoolByConnString(driver string, connString string, poolSize int) *DBPool {
+	pool := &DBPool{driver, connString, poolSize, make(chan *Database, poolSize)}
+	err := pool.fill()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return pool
+}
+
+func (p *DBPool) fill() error {
+	for len(p.dbQueue) < p.poolSize {
+		db := new(Database)
+		err := db.Open(p.driver, p.connString)
+		if err != nil {
+			return err
+		}
+		p.dbQueue <- db
+	}
+	return nil
+}
+
+func (p *DBPool) GetDB() *Database {
+	return <-p.dbQueue
+}
+
+func (p *DBPool) ReleaseDB(db *Database) {
+	p.dbQueue <- db
+}
