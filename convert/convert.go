@@ -1,7 +1,9 @@
 package convert
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"strconv"
 )
 
@@ -52,4 +54,10 @@ func String(val interface{}) string {
 	default:
 		return fmt.Sprintf("%v", val)
 	}
+}
+
+func MD5(src string) string {
+	h := md5.New()
+	io.WriteString(h, src)
+	return h.Sum(nil)
 }
