@@ -3,7 +3,6 @@ package convert
 import (
 	"crypto/md5"
 	"fmt"
-	"io"
 	"strconv"
 )
 
