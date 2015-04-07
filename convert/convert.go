@@ -57,7 +57,5 @@ func String(val interface{}) string {
 }
 
 func MD5(src string) string {
-	h := md5.New()
-	io.WriteString(h, src)
-	return string(h.Sum(nil))
+	return fmt.Sprintf("%x", md5.Sum([]byte(src)))
 }
