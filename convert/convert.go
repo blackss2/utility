@@ -55,6 +55,10 @@ func String(val interface{}) string {
 	}
 }
 
+func QueryString(val string) string {
+	return strings.Join(strings.Split(Queting, "'"), "''")
+}
+
 func MD5(src string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(src)))
 }
