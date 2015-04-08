@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func Int(val interface{}) int64 {
@@ -56,7 +57,7 @@ func String(val interface{}) string {
 }
 
 func QueryString(val string) string {
-	return strings.Join(strings.Split(Queting, "'"), "''")
+	return strings.Join(strings.Split(val, "'"), "''")
 }
 
 func MD5(src string) string {
