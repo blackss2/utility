@@ -1,8 +1,10 @@
 package convert
 
 import (
+	"crypto/md5"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func Int(val interface{}) int64 {
@@ -52,4 +54,12 @@ func String(val interface{}) string {
 	default:
 		return fmt.Sprintf("%v", val)
 	}
+}
+
+func QueryString(val string) string {
+	return strings.Join(strings.Split(val, "'"), "''")
+}
+
+func MD5(src string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(src)))
 }
