@@ -152,11 +152,11 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data interface{}
 		body, _ := ioutil.ReadAll(c.Request.Body)
-		err := json.Marshal(body, &data)
+		err := json.Unmarshal(body, &data)
 		if err != nil {
 			var buffer bytes.Buffer
 			buffer.Write(body)
-			c.Request.Body = bufio.NewReader(&buffer)
+			c.Request.Body = ioutil.NopCloser(bufio.NewReader(&buffer))
 		}
 		context := &Context{
 			code:    -1,
