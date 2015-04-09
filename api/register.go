@@ -181,7 +181,8 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 			case nil:
 				c.AbortWithStatus(context.code)
 			case string:
-				c.String(context.code, context.ret.(string))
+				c.HTMLString(context.code, context.ret.(string), nil)
+				//c.String(context.code, context.ret.(string))
 			default:
 				c.JSON(context.code, context.ret)
 			}
