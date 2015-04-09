@@ -2,6 +2,8 @@ package api
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
@@ -154,8 +156,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		if err != nil {
 			var buffer bytes.Buffer
 			buffer.Write(body)
-			c.Request.Body = bufio.NewWriter(&buffer)
-			//panic(err)
+			c.Request.Body = bufio.NewReader(&buffer)
 		}
 		context := &Context{
 			code:    -1,
