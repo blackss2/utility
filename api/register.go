@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -147,8 +149,12 @@ func (this *EngineGroup) DELETE(path string, handler APIHandler) {
 func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data interface{}
-		err := c.ParseBody(&data)
+		body, _ := ioutil.ReadAll(c.Request.Body)
+		err := json.Marshal(body, &data)
 		if err != nil {
+			var buffer bytes.Buffer
+			buffer.Write(body)
+			c.Request.Body = bufio.NewWriter(&buffer)
 			//panic(err)
 		}
 		context := &Context{
