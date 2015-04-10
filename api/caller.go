@@ -139,9 +139,17 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	buffer.WriteString(this.engine.host)
 	urlPath := this.url
 	if len(this.Params.Params) > 0 {
-		for _, v := range this.Params.Params {
-			urlPath = strings.Replace(urlPath, fmt.Sprintf(":%s", v.Key), v.Value, 1)
+		urlList := strings.Split(urlPath, "/")
+		urlHash := make(map[string]int)
+		for i, v := range urlList {
+			urlHash[v] = i
 		}
+		for _, v := range this.Params.Params {
+			if idx, has := urlHash[fmt.Sprintf(":%s", v.Key)]; has {
+				urlList[idx] = v.Value
+			}
+		}
+		urlPath = strings.Join(urlList, "/")
 	}
 	buffer.WriteString(urlPath)
 	if len(this.QParams) > 0 {
