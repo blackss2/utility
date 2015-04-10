@@ -236,8 +236,9 @@ func (this *CallParams) Set(key string, val string) {
 	param.Key = key
 	param.Value = val
 	has := false
+	fmt.Println(key, "\t", val)
 	for _, v := range this.Params {
-		fmt.Print(v.Key, v.Value, "\t")
+		fmt.Print(v.Key, "\t", v.Value, "\t")
 	}
 	fmt.Println("")
 	for _, v := range this.Params {
@@ -250,7 +251,7 @@ func (this *CallParams) Set(key string, val string) {
 		this.Params = append(this.Params, param)
 	}
 	for _, v := range this.Params {
-		fmt.Print(v.Key, v.Value, "\t")
+		fmt.Print(v.Key, "\t", v.Value, "\t")
 	}
 	fmt.Println("")
 }
