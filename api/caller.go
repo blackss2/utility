@@ -212,7 +212,7 @@ func (this *Caller) Call() (code int, ret interface{}) {
 		if err != nil {
 			//panic(err)
 		}
-		
+
 		var reqRet interface{}
 		if body != nil && len(body) > 0 {
 			err := json.Unmarshal(body, &reqRet)
@@ -220,7 +220,7 @@ func (this *Caller) Call() (code int, ret interface{}) {
 				reqRet = string(body)
 			}
 		}
-		
+
 		code = res.StatusCode
 		ret = reqRet
 	}
@@ -235,7 +235,16 @@ func (this *CallParams) Set(key string, val string) {
 	var param httprouter.Param
 	param.Key = key
 	param.Value = val
-	this.Params = append(this.Params, param)
+	has := false
+	for _, v := range this.Params {
+		if key == v.Key {
+			v.Value = val
+			has = true
+		}
+	}
+	if !has {
+		this.Params = append(this.Params, param)
+	}
 }
 
 // response implements http.ResponseWriter.
