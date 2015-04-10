@@ -241,9 +241,9 @@ func (this *CallParams) Set(key string, val string) {
 		fmt.Print(v.Key, "\t", v.Value, "\t")
 	}
 	fmt.Println("")
-	for _, v := range this.Params {
+	for i, v := range this.Params {
 		if strings.ToLower(key) == strings.ToLower(v.Key) {
-			v.Value = val
+			this.Params[i].Value = val
 			has = true
 		}
 	}
