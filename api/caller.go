@@ -139,7 +139,6 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	buffer.WriteString(this.engine.host)
 	urlPath := this.url
 	if len(this.Params.Params) > 0 {
-		fmt.Println(urlPath)
 		urlList := strings.Split(urlPath, "/")
 		urlHash := make(map[string]int)
 		for i, v := range urlList {
@@ -151,7 +150,6 @@ func (this *Caller) Call() (code int, ret interface{}) {
 			}
 		}
 		urlPath = strings.Join(urlList, "/")
-		fmt.Println(urlPath)
 	}
 	buffer.WriteString(urlPath)
 	if len(this.QParams) > 0 {
