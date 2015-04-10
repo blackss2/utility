@@ -87,9 +87,7 @@ func (this *BuildEngine) createCaller(url string, method int) *Caller {
 		engine: this,
 		url:    url,
 		method: method,
-		Params: &CallParams{
-			Params: make([]httprouter.Param, 0),
-		},
+		Params: make(map[string]string),
 		QParams: make(map[string][]string),
 		handler: handler,
 		client:  client,
@@ -113,7 +111,7 @@ type Caller struct {
 	engine  *BuildEngine
 	url     string
 	method  int
-	Params  *CallParams
+	Params  CallParams
 	QParams url.Values
 	Data    interface{}
 	handler localAPIHandler
@@ -184,11 +182,18 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	}
 	req.Header.Add("Cookie", this.engine.cookie)
 	if isRoutable {
+		Params := make([]httprouter.Param, len(this.Params))
+		for k, v := range this.Params {
+			var p httprouter.Param
+			p.Key = k
+			p.Value = v
+			Params = append(Params, p)
+		}
 		context := &Context{
 			code:    -1,
 			ret:     nil,
 			Data:    this.Data,
-			Params:  this.Params.Params,
+			Params:  Params,
 			QParams: this.QParams,
 			Request: req,
 			Writer:  newResponse(),
@@ -227,33 +232,10 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	return
 }
 
-type CallParams struct {
-	httprouter.Params
-}
+type CallParams map[string]string
 
-func (this *CallParams) Set(key string, val string) {
-	var param httprouter.Param
-	param.Key = key
-	param.Value = val
-	has := false
-	fmt.Println(key, "\t", val)
-	for _, v := range this.Params {
-		fmt.Print(v.Key, "\t", v.Value, "\t")
-	}
-	fmt.Println("")
-	for i, v := range this.Params {
-		if strings.ToLower(key) == strings.ToLower(v.Key) {
-			this.Params[i].Value = val
-			has = true
-		}
-	}
-	if !has {
-		this.Params = append(this.Params, param)
-	}
-	for _, v := range this.Params {
-		fmt.Print(v.Key, "\t", v.Value, "\t")
-	}
-	fmt.Println("")
+func (this CallParams) Set(key string, val string) {
+	this[key] = val
 }
 
 // response implements http.ResponseWriter.
