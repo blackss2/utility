@@ -142,10 +142,10 @@ func (this *Caller) Call() (code int, ret interface{}) {
 		urlList := strings.Split(urlPath, "/")
 		urlHash := make(map[string]int)
 		for i, v := range urlList {
-			urlHash[v] = i
+			urlHash[strings.ToLower(v)] = i
 		}
 		for _, v := range this.Params.Params {
-			if idx, has := urlHash[fmt.Sprintf(":%s", v.Key)]; has {
+			if idx, has := urlHash[strings.ToLower(fmt.Sprintf(":%s", v.Key))]; has {
 				urlList[idx] = v.Value
 			}
 		}
@@ -237,11 +237,11 @@ func (this *CallParams) Set(key string, val string) {
 	param.Value = val
 	has := false
 	for _, v := range this.Params {
-		fmt.Print(v.key, v.Value, "\t")
+		fmt.Print(v.Key, v.Value, "\t")
 	}
 	fmt.Println("")
 	for _, v := range this.Params {
-		if key == v.Key {
+		if strings.ToLower(key) == strings.ToLower(v.Key) {
 			v.Value = val
 			has = true
 		}
@@ -250,7 +250,7 @@ func (this *CallParams) Set(key string, val string) {
 		this.Params = append(this.Params, param)
 	}
 	for _, v := range this.Params {
-		fmt.Print(v.key, v.Value, "\t")
+		fmt.Print(v.Key, v.Value, "\t")
 	}
 	fmt.Println("")
 }
