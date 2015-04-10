@@ -136,15 +136,15 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString(this.engine.host)
 	urlPath := this.url
-	if len(this.Params.Params) > 0 {
+	if len(this.Params) > 0 {
 		urlList := strings.Split(urlPath, "/")
 		urlHash := make(map[string]int)
 		for i, v := range urlList {
 			urlHash[strings.ToLower(v)] = i
 		}
-		for _, v := range this.Params.Params {
-			if idx, has := urlHash[strings.ToLower(fmt.Sprintf(":%s", v.Key))]; has {
-				urlList[idx] = v.Value
+		for k, v := range this.Params {
+			if idx, has := urlHash[strings.ToLower(fmt.Sprintf(":%s", k))]; has {
+				urlList[idx] = v
 			}
 		}
 		urlPath = strings.Join(urlList, "/")
