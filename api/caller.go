@@ -237,6 +237,10 @@ func (this *CallParams) Set(key string, val string) {
 	param.Value = val
 	has := false
 	for _, v := range this.Params {
+		fmt.Print(v.key, v.Value, "\t")
+	}
+	fmt.Println("")
+	for _, v := range this.Params {
 		if key == v.Key {
 			v.Value = val
 			has = true
@@ -245,6 +249,10 @@ func (this *CallParams) Set(key string, val string) {
 	if !has {
 		this.Params = append(this.Params, param)
 	}
+	for _, v := range this.Params {
+		fmt.Print(v.key, v.Value, "\t")
+	}
+	fmt.Println("")
 }
 
 // response implements http.ResponseWriter.
