@@ -159,7 +159,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 			c.Request.Body = ioutil.NopCloser(bufio.NewReader(&buffer))
 		}
 		context := &Context{
-			code:    -1,
+			code:    unresolvedCode,
 			ret:     nil,
 			Data:    data,
 			Params:  c.Params,
@@ -171,7 +171,8 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		handler(context, session)
 		session.Save(c.Request, c.Writer)
 		switch context.code {
-		case -1:
+		case unresolvedCode:
+			c.AbortWithStatus(http.StatusNoContent)
 		case http.StatusMovedPermanently:
 			c.Redirect(context.code, context.ret.(string))
 		case http.StatusTemporaryRedirect:

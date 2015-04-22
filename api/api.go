@@ -8,6 +8,8 @@ import (
 
 var API_SESSION_NAME string = "API_SERVICE"
 
+const unresolvedCode = -1
+
 type Context struct {
 	code    int
 	ret     interface{}
@@ -25,6 +27,10 @@ func (this *Context) Abort(code int) {
 func (this *Context) Resolve(code int, ret interface{}) {
 	this.code = code
 	this.ret = ret
+}
+
+func (this *Context) IsResolved() bool {
+	return this.code != unresolvedCode
 }
 
 var localSupportHash map[string]*EngineGroup = make(map[string]*EngineGroup)

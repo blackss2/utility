@@ -190,7 +190,7 @@ func (this *Caller) Call() (code int, ret interface{}) {
 			Params = append(Params, p)
 		}
 		context := &Context{
-			code:    -1,
+			code:    unresolvedCode,
 			ret:     nil,
 			Data:    this.Data,
 			Params:  Params,
