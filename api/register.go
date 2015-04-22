@@ -172,7 +172,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		session.Save(c.Request, c.Writer)
 		switch context.code {
 		case unresolvedCode:
-			c.AbortWithStatus(http.StatusNoContent)
+			c.AbortWithStatus(http.StatusInternalServerError)
 		case http.StatusMovedPermanently:
 			c.Redirect(context.code, context.ret.(string))
 		case http.StatusTemporaryRedirect:
