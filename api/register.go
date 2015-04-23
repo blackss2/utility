@@ -35,7 +35,6 @@ type Engine struct {
 	gin   *gin.Engine
 	store *sessions.CookieStore
 	addr  string
-	CORS  bool
 }
 
 type EngineGroup struct {
@@ -44,6 +43,18 @@ type EngineGroup struct {
 	routerGroup *gin.RouterGroup
 	path        string
 	handlerHash map[string][]localAPIHandler
+	CORS  bool
+}
+
+func (this *EngineGroup)SetCORS(CORS bool) {
+	this.CORS = CORS
+}
+
+func (this *EngineGroup)SetCORSAll(CORS bool) {
+	this.CORS = CORS
+	for _, child := range this.children {
+		child.SetCORSAll(CORS)
+	}
 }
 
 type localAPIHandler func(*Context)
@@ -171,7 +182,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		session, _ := this.engine.store.Get(c.Request, API_SESSION_NAME)
 		handler(context, session)
 		session.Save(c.Request, c.Writer)
-		if this.engine.CORS {
+		if this.CORS {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
