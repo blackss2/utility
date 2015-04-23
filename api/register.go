@@ -74,6 +74,12 @@ func Default(name string, addr string) *EngineGroup {
 		path:        "",
 		handlerHash: make(map[string][]localAPIHandler),
 	}
+	engine.gin.OPTIONS("/*", func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.AbortWithStatus(http.StatusOK)
+	})
 	engine.gin.NoMethod(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
         c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
