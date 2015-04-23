@@ -62,23 +62,14 @@ func Default(name string, addr string) *EngineGroup {
 		path:        "",
 		handlerHash: make(map[string][]localAPIHandler),
 	}
+	engine.gin.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
+        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
+        c.Next()
+    })
 	engine.gin.OPTIONS("/*all", func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
-		c.AbortWithStatus(http.StatusOK)
-	})
-	engine.gin.NoMethod(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
-		c.AbortWithStatus(http.StatusMethodNotAllowed)
-	})
-	engine.gin.NotFound404(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
-		c.AbortWithStatus(http.StatusNotFound)
+		c.AbortWithStatus(http.StatusOK)//TEMP
 	})
 	apiLocalSupportRegister(addr, router)
 	return router
@@ -188,9 +179,6 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		session, _ := this.engine.store.Get(c.Request, API_SESSION_NAME)
 		handler(context, session)
 		session.Save(c.Request, c.Writer)
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
 		switch context.code {
 		case unresolvedCode:
 			c.AbortWithStatus(http.StatusInternalServerError)
