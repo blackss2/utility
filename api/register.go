@@ -51,7 +51,7 @@ func (this *EngineGroup)SetCORS(CORS bool) {
 }
 
 func (this *EngineGroup)SetCORSAll(CORS bool) {
-	this.CORS = CORS
+	this.SetCORS(CORS)
 	for _, child := range this.children {
 		child.SetCORSAll(CORS)
 	}
