@@ -35,6 +35,7 @@ type Engine struct {
 	gin   *gin.Engine
 	store *sessions.CookieStore
 	addr  string
+	CORS  bool
 }
 
 type EngineGroup struct {
@@ -170,6 +171,10 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		session, _ := this.engine.store.Get(c.Request, API_SESSION_NAME)
 		handler(context, session)
 		session.Save(c.Request, c.Writer)
+		if this.engine.CORS {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
 		switch context.code {
 		case unresolvedCode:
 			c.AbortWithStatus(http.StatusInternalServerError)
