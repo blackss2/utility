@@ -82,7 +82,7 @@ func Default(name string, addr string) *EngineGroup {
 	engine.gin.NotFound404(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.AbortWithStatus(http.StatusMethodNotAllowed)
+		c.AbortWithStatus(http.StatusNotFound)
 	})
 	apiLocalSupportRegister(addr, router)
 	return router
