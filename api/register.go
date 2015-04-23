@@ -75,10 +75,13 @@ func Default(name string, addr string) *EngineGroup {
 		handlerHash: make(map[string][]localAPIHandler),
 	}
 	engine.gin.NoMethod(func(c *gin.Context) {
-		if this.CORS {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
-			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		}
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.AbortWithStatus(http.StatusMethodNotAllowed)
+	})
+	engine.gin.NotFound404(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.AbortWithStatus(http.StatusMethodNotAllowed)
 	})
 	apiLocalSupportRegister(addr, router)
