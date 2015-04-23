@@ -65,6 +65,7 @@ func Default(name string, addr string) *EngineGroup {
 	engine.gin.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS")//TEMP
         c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
         c.Next()
     })
