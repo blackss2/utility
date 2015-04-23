@@ -76,11 +76,13 @@ func Default(name string, addr string) *EngineGroup {
 	}
 	engine.gin.NoMethod(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.AbortWithStatus(http.StatusMethodNotAllowed)
 	})
 	engine.gin.NotFound404(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.AbortWithStatus(http.StatusNotFound)
 	})
@@ -194,6 +196,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 		session.Save(c.Request, c.Writer)
 		if this.CORS {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+	        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE");
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
 		switch context.code {
