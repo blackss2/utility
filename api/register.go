@@ -77,16 +77,19 @@ func Default(name string, addr string) *EngineGroup {
 	engine.gin.OPTIONS("/*all", func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		c.AbortWithStatus(http.StatusOK)
 	})
 	engine.gin.NoMethod(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		c.AbortWithStatus(http.StatusMethodNotAllowed)
 	})
 	engine.gin.NotFound404(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
         c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		c.AbortWithStatus(http.StatusNotFound)
 	})
 	apiLocalSupportRegister(addr, router)
@@ -201,6 +204,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 	        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		switch context.code {
 		case unresolvedCode:
 			c.AbortWithStatus(http.StatusInternalServerError)
