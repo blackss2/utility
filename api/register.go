@@ -43,14 +43,14 @@ type EngineGroup struct {
 	routerGroup *gin.RouterGroup
 	path        string
 	handlerHash map[string][]localAPIHandler
-	CORS  bool
+	CORS        bool
 }
 
-func (this *EngineGroup)SetCORS(CORS bool) {
+func (this *EngineGroup) SetCORS(CORS bool) {
 	this.CORS = CORS
 }
 
-func (this *EngineGroup)SetCORSAll(CORS bool) {
+func (this *EngineGroup) SetCORSAll(CORS bool) {
 	this.SetCORS(CORS)
 	for _, child := range this.children {
 		child.SetCORSAll(CORS)
@@ -74,6 +74,13 @@ func Default(name string, addr string) *EngineGroup {
 		path:        "",
 		handlerHash: make(map[string][]localAPIHandler),
 	}
+	engine.gin.NoMethod(func(c *gin.Context) {
+		if this.CORS {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
+		c.AbortWithStatus(http.StatusMethodNotAllowed)
+	})
 	apiLocalSupportRegister(addr, router)
 	return router
 }
