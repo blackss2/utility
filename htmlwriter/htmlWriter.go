@@ -26,7 +26,7 @@ func (n *HtmlNode) Add(name string) *HtmlNode {
 }
 func (n *HtmlNode) InsertAfter(c *HtmlNode) *HtmlNode {
 	if n.parents != nil {
-		n.detach()
+		n.Detach()
 	}
 
 	if len(c.parents.child) > 0 {
@@ -54,19 +54,19 @@ func (n *HtmlNode) Eq(idx int) *HtmlNode {
 
 func (n *HtmlNode) Append(c *HtmlNode) *HtmlNode {
 	if c.parents != nil {
-		c.detach()
+		c.Detach()
 	}
 	n.child = append(n.child, c)
 	c.parents = n
 	return n
 }
 func (c *HtmlNode) AppendTo(n *HtmlNode) *HtmlNode {
-	n.append(c)
+	n.Append(c)
 	return c
 }
 
 func (n *HtmlNode) Detach() *HtmlNode {
-	return n.parents.remove(n)
+	return n.parents.Remove(n)
 }
 func (n *HtmlNode) Remove(c *HtmlNode) *HtmlNode {
 	if len(n.child) > 0 {
