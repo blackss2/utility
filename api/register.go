@@ -79,6 +79,11 @@ func Default(name string, addr string) *EngineGroup {
 
 func (this *EngineGroup) Group(path string) *EngineGroup {
 	var routerGroup *gin.RouterGroup
+	for _, child := range this.children {
+		if path == child.path {
+			return child
+		}
+	}
 	if this.routerGroup != nil {
 		routerGroup = this.routerGroup.Group(path)
 	} else {
