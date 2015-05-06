@@ -198,13 +198,13 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 			case nil:
 				c.AbortWithStatus(context.code)
 			case string:
-				fallthrough
+				c.HTMLString(context.code, context.ret.(string))
 			case int:
-				fallthrough
+				c.HTMLString(context.code, convert.String(context.ret))
 			case int64:
-				fallthrough
+				c.HTMLString(context.code, convert.String(context.ret))
 			case float32:
-				fallthrough
+				c.HTMLString(context.code, convert.String(context.ret))
 			case float64:
 				c.HTMLString(context.code, convert.String(context.ret))
 			default:
