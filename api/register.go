@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/blackss2/utility/convert"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"io/ioutil"
@@ -63,14 +64,14 @@ func Default(name string, addr string) *EngineGroup {
 		handlerHash: make(map[string][]localAPIHandler),
 	}
 	engine.gin.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS")//TEMP
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")//TEMP
-        c.Next()
-    })
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))     //TEMP
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")                        //TEMP
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS") //TEMP
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")                    //TEMP
+		c.Next()
+	})
 	engine.gin.OPTIONS("/*all", func(c *gin.Context) {
-		c.AbortWithStatus(http.StatusOK)//TEMP
+		c.AbortWithStatus(http.StatusOK) //TEMP
 	})
 	apiLocalSupportRegister(addr, router)
 	return router
@@ -193,7 +194,11 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 				c.AbortWithStatus(context.code)
 			case string:
 				c.HTMLString(context.code, context.ret.(string))
-				//c.String(context.code, context.ret.(string))
+			case int:
+			case int64:
+			case float32:
+			case float64:
+				c.HTMLString(context.code, convert.String(context.ret))
 			default:
 				c.JSON(context.code, context.ret)
 			}
