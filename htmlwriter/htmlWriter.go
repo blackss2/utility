@@ -88,6 +88,10 @@ func (n *HtmlNode) SetText(text string) *HtmlNode {
 }
 
 func (n *HtmlNode) Write(buffer *bytes.Buffer) {
+	n.WriteWith(buffer, "")
+}
+
+func (n *HtmlNode) WriteWith(buffer *bytes.Buffer, with string) {
 	buffer.WriteString("<")
 	buffer.WriteString(n.name)
 
@@ -142,7 +146,8 @@ func (n *HtmlNode) Write(buffer *bytes.Buffer) {
 	if len(n.text) > 0 {
 		buffer.WriteString(n.text)
 	}
-	for _, v := range n.child {
+	for i, v := range n.child {
+		buffer.WriteString(with)		
 		v.Write(buffer)
 	}
 	if n.name != "br" {
