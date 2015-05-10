@@ -148,7 +148,7 @@ func (n *HtmlNode) WriteWith(buffer *bytes.Buffer, with string) {
 	}
 	for _, v := range n.child {
 		buffer.WriteString(with)		
-		v.Write(buffer)
+		v.WriteWith(buffer, with)
 	}
 	if n.name != "br" {
 		buffer.WriteString("</")
