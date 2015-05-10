@@ -146,7 +146,7 @@ func (n *HtmlNode) WriteWith(buffer *bytes.Buffer, with string) {
 	if len(n.text) > 0 {
 		buffer.WriteString(n.text)
 	}
-	for i, v := range n.child {
+	for _, v := range n.child {
 		buffer.WriteString(with)		
 		v.Write(buffer)
 	}
