@@ -6,8 +6,6 @@ import (
 	"net/url"
 )
 
-var API_SESSION_NAME string = "API_SERVICE"
-
 const unresolvedCode = -1
 
 type Context struct {

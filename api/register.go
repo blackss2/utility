@@ -4,10 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/blackss2/utility/convert"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 	"io/ioutil"
 	"net/http"
 )
@@ -19,22 +17,21 @@ apiRouter := router.Group("/api")
 apiRouter.RequirePermission(true)
 apiStoragesRouter := apiRouter.Group("/storages")
 apiStoragesRouter.RequirePermission(true)
-apiStoragesRouter.PUT("/", func(c *api.Context, s *sessions.Session) {
+apiStoragesRouter.PUT("/", func(c *api.Context) {
 	c.Abort(http.StatusOK)
 })
-apiStoragesRouter.GET("/", func(c *api.Context, s *sessions.Session) {
+apiStoragesRouter.GET("/", func(c *api.Context) {
 	c.Resolve(http.StatusOK, "123")
 })
-apiStoragesRouter.POST("/", func(c *api.Context, s *sessions.Session) {
+apiStoragesRouter.POST("/", func(c *api.Context) {
 	c.Resolve(http.StatusOK, nil)
 })
-apiStoragesRouter.DELETE("/", func(c *api.Context, s *sessions.Session) {
+apiStoragesRouter.DELETE("/", func(c *api.Context) {
 	c.Abort(http.StatusOK)
 })
 */
 type Engine struct {
 	gin   *gin.Engine
-	store *sessions.CookieStore
 	addr  string
 }
 
@@ -48,12 +45,11 @@ type EngineGroup struct {
 
 type localAPIHandler func(*Context)
 
-type APIHandler func(*Context, *sessions.Session)
+type APIHandler func(*Context)
 
-func Default(name string, addr string) *EngineGroup {
+func Default(addr string) *EngineGroup {
 	engine := &Engine{
 		gin:   gin.Default(),
-		store: sessions.NewCookieStore([]byte(fmt.Sprintf("%s-Server-Store", name))),
 		addr:  addr,
 	}
 	router := &EngineGroup{
@@ -114,9 +110,7 @@ func (this *EngineGroup) register(method int, path string, handler APIHandler) {
 		this.handlerHash[path] = apiList
 	}
 	apiList[method] = func(c *Context) {
-		session, _ := this.engine.store.Get(c.Request, API_SESSION_NAME)
-		handler(c, session)
-		session.Save(c.Request, c.Writer)
+		handler(c)
 	}
 
 	handlerImp := this.getHandlerImp(handler)
@@ -183,9 +177,7 @@ func (this *EngineGroup) getHandlerImp(handler APIHandler) gin.HandlerFunc {
 			Request: c.Request,
 			Writer:  c.Writer,
 		}
-		session, _ := this.engine.store.Get(c.Request, API_SESSION_NAME)
-		handler(context, session)
-		session.Save(c.Request, c.Writer)
+		handler(context)
 		switch context.code {
 		case unresolvedCode:
 			c.AbortWithStatus(http.StatusInternalServerError)
