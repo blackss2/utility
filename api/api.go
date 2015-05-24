@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
 )
@@ -12,7 +12,7 @@ type Context struct {
 	code    int
 	ret     interface{}
 	Data    interface{}
-	Params  httprouter.Params
+	Params  gin.Params
 	QParams url.Values
 	Request *http.Request
 	Writer  http.ResponseWriter
