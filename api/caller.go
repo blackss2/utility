@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -182,9 +182,9 @@ func (this *Caller) Call() (code int, ret interface{}) {
 	}
 	req.Header.Add("Cookie", this.engine.cookie)
 	if isRoutable {
-		Params := make([]httprouter.Param, len(this.Params))
+		Params := make([]gin.Param, len(this.Params))
 		for k, v := range this.Params {
-			var p httprouter.Param
+			var p gin.Param
 			p.Key = k
 			p.Value = v
 			Params = append(Params, p)
