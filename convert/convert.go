@@ -29,17 +29,33 @@ func Int(val interface{}) int64 {
 
 func IntWith(val interface{}, defaultValue int64) int64 {
 	if val != nil {
+		return Int(val)
+	}
+	return defaultValue
+}
+
+func Float(val interface{}) float64 {
+	if val != nil {
 		switch val.(type) {
 		case float64:
-			return int64(val.(float64))
+			return val.(float64)
 		case int64:
-			return val.(int64)
+			return float64(val.(int64))
 		case string:
-			ret, err := strconv.Atoi(val.(string))
-			if err == nil {
-				return int64(ret)
+			ret, err := strconv.ParseFloat(val.(string), 64)
+			if err != nil {
+				return 0
+			} else {
+				return float64(ret)
 			}
 		}
+	}
+	return 0
+}
+
+func FloatWith(val interface{}, defaultValue float64) float64 {
+	if val != nil {
+		return Float(val)
 	}
 	return defaultValue
 }
