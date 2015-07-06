@@ -15,12 +15,12 @@ func Int(val interface{}) int64 {
 			return int64(val.(float64))
 		case int64:
 			return val.(int64)
-		case string:
-			ret, err := strconv.Atoi(val.(string))
+		default:
+			ret, err := strconv.ParseInt(convert.String(val), 64)
 			if err != nil {
 				return 0
 			} else {
-				return int64(ret)
+				return ret
 			}
 		}
 	}
@@ -41,8 +41,8 @@ func Float(val interface{}) float64 {
 			return val.(float64)
 		case int64:
 			return float64(val.(int64))
-		case string:
-			ret, err := strconv.ParseFloat(val.(string), 64)
+		default:
+			ret, err := strconv.ParseFloat(convert.String(val), 64)
 			if err != nil {
 				return 0
 			} else {
