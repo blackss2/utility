@@ -15,7 +15,8 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 	var connString string
 	switch driver {
 	case "mssql":
-		connString = fmt.Sprintf("Server=%s;Port=%d;Database=%s;User Id=%s;Password=%s", ip, port, name, id, pw)
+		timeout := 300
+		connString = fmt.Sprintf("Server=%s;Port=%d;Database=%s;User Id=%s;Password=%s;connection timeout=%d", ip, port, name, id, pw, timeout)
 	case "mysql":
 		connString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", id, pw, ip, port, name)
 	case "mymysql":
