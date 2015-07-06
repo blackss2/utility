@@ -16,7 +16,7 @@ func Int(val interface{}) int64 {
 		case int64:
 			return val.(int64)
 		default:
-			ret, err := strconv.ParseInt(String(val), 64)
+			ret, err := strconv.ParseInt(String(val), 10, 64)
 			if err != nil {
 				return 0
 			} else {
