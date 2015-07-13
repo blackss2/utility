@@ -29,7 +29,19 @@ func Int(val interface{}) int64 {
 
 func IntWith(val interface{}, defaultValue int64) int64 {
 	if val != nil {
-		return Int(val)
+		switch val.(type) {
+		case float64:
+			return int64(val.(float64))
+		case int64:
+			return val.(int64)
+		default:
+			ret, err := strconv.ParseInt(String(val), 10, 64)
+			if err != nil {
+				return defaultValue
+			} else {
+				return ret
+			}
+		}
 	}
 	return defaultValue
 }
@@ -55,7 +67,19 @@ func Float(val interface{}) float64 {
 
 func FloatWith(val interface{}, defaultValue float64) float64 {
 	if val != nil {
-		return Float(val)
+		switch val.(type) {
+		case float64:
+			return val.(float64)
+		case int64:
+			return float64(val.(int64))
+		default:
+			ret, err := strconv.ParseFloat(String(val), 64)
+			if err != nil {
+				return defaultValue
+			} else {
+				return float64(ret)
+			}
+		}
 	}
 	return defaultValue
 }
