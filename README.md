@@ -44,7 +44,8 @@ mymysql : "github.com/ziutek/mymysql/godrv"
 database.CreateDBPool(DBTYPE, IP_ADDRESS, PORT, DBNAME, ID, PASSWORD, POOLSIZE)
 
 (ex)
-
+</pre>
+<pre>
 import (
 	"github.com/blackss2/utility/database"
 	"fmt"
@@ -139,7 +140,8 @@ add attribute
 
 - (*htmlwriter.HtmlNode) RemoveAttr(name string) *htmlwriter.HtmlNode
 remove attribute
-
+</pre>
+<pre>
 jDiv := htmlwriter.CreateHtmlNode("div")
 jTr := jDiv.Add("table").Class("table-bordered").Attr("id", "TABLEID")
 jTr.Add("td").SetText("Cell1").Add("td").SetText("Cell2").Attr("colspan", "2")
