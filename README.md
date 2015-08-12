@@ -1,7 +1,8 @@
 # utility
 Set of utilities
-
+<br>
 # Convert
+<pre>
 convert value to target format
 simple & useful
 
@@ -27,10 +28,11 @@ else => fmt.Sprintf("%v")
 replace ' in string to '' for SQL
 
 - convert.MD5(src string) string
-chnage src to MD5 hexa formatted string
-
-
+change src to MD5 hexa formatted string
+</pre>
+<br>
 # Database
+<pre>
 Basic DB Wrapper with DBPool
 automatically reconnect when disconnected
 using driver
@@ -82,9 +84,10 @@ func main() {
   	}
   }
 }
-
-
+</pre>
+<br>
 # htmlwriter
+<pre>
 Simple HTML Builder
 Escaping for attr, class, style is not implemented
 
@@ -145,3 +148,4 @@ jTr.Add("td").SetText("Cell1").Add("td").SetText("Cell2").Add("td").SetText("Cel
 var buffer bytes.Buffer
 jDiv.Write(&buffer)//not standard write function
 fmt.Println(buffer.String())
+</pre>
