@@ -2,6 +2,7 @@ package convert
 
 import (
 	"crypto/md5"
+	"crypto/sha256"
 	"fmt"
 	"strconv"
 	"strings"
@@ -106,4 +107,10 @@ func QueryString(val string) string {
 
 func MD5(src string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(src)))
+}
+
+func SHA256(src string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(src))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
