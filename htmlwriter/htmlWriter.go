@@ -89,7 +89,7 @@ func (n *HtmlNode) SetText(text string) *HtmlNode {
 
 func (n *HtmlNode) String() string {
 	var buffer bytes.Buffer
-	n.Write(buffer)
+	n.Write(&buffer)
 	return buffer.String()
 }
 
