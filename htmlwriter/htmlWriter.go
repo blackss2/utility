@@ -87,6 +87,12 @@ func (n *HtmlNode) SetText(text string) *HtmlNode {
 	return n
 }
 
+func (n *HtmlNode) String() string {
+	var buffer bytes.Buffer
+	n.Write(buffer)
+	return buffer.String()
+}
+
 func (n *HtmlNode) Write(buffer *bytes.Buffer) {
 	n.WriteWith(buffer, "")
 }
@@ -147,7 +153,7 @@ func (n *HtmlNode) WriteWith(buffer *bytes.Buffer, with string) {
 		buffer.WriteString(n.text)
 	}
 	for _, v := range n.child {
-		buffer.WriteString(with)		
+		buffer.WriteString(with)
 		v.WriteWith(buffer, with)
 	}
 	if n.name != "br" {
