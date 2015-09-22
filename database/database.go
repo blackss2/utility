@@ -115,15 +115,26 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, true, false, make([]string, 0, 100)}
 	rows.inst, err = stmt.Query()
 
-	if err != nil && err.Error() != "Stmt did not create a result set" {
-		println("P2 : ", err.Error(), "\n", queryStr)
-		return nil, err
+	if err != nil {
+		if err.Error() != "Stmt did not create a result set" {
+			println("P2 : ", err.Error(), "\n", queryStr)
+			return nil, err
+		} else {
+			runtime.SetFinalizer(rows, func(f interface{}) {
+				f.(*Rows).Close()
+			})
+			return rows, nil
+		}
 	}
 
 	rows.Cols, err = rows.inst.Columns()
 
 	if !rows.inst.Next() {
 		rows.Close()
+	} else {
+		runtime.SetFinalizer(rows, func(f interface{}) {
+			f.(*Rows).Close()
+		})
 	}
 
 	QUERYSTR := strings.ToUpper(queryStr)
@@ -132,10 +143,6 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 			return nil, errors.New("insert.fail")
 		}
 	}
-
-	runtime.SetFinalizer(rows, func(f interface{}) {
-		f.(*Rows).Close()
-	})
 
 	return rows, nil
 }
