@@ -77,15 +77,26 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 	rows.inst, err = stmt.Query()
 
 	if err != nil {
-		db.Close()
-		db.executeOpen()
-		return db.TempQuery(queryStr)
+		if err.Error() != "Stmt did not create a result set" {
+			db.Close()
+			db.executeOpen()
+			return db.TempQuery(queryStr)
+		} else {
+			runtime.SetFinalizer(rows, func(f interface{}) {
+				f.(*Rows).Close()
+			})
+			return rows, nil
+		}
 	}
 
 	rows.Cols, err = rows.inst.Columns()
 
 	if !rows.inst.Next() {
 		rows.Close()
+	} else {
+		runtime.SetFinalizer(rows, func(f interface{}) {
+			f.(*Rows).Close()
+		})
 	}
 
 	QUERYSTR := strings.ToUpper(queryStr)
@@ -94,10 +105,6 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 			return nil, errors.New("insert.fail")
 		}
 	}
-
-	runtime.SetFinalizer(rows, func(f interface{}) {
-		f.(*Rows).Close()
-	})
 
 	return rows, nil
 }
