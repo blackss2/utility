@@ -115,7 +115,7 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, true, false, make([]string, 0, 100)}
 	rows.inst, err = stmt.Query()
 
-	if err != nil {
+	if err != nil && err.Error() != "Stmt did not create a result set" {
 		println("P2 : ", err.Error(), "\n", queryStr)
 		return nil, err
 	}
