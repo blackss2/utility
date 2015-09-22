@@ -21,8 +21,10 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 		connString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", id, pw, ip, port, name)
 	case "mymysql":
 		connString = fmt.Sprintf("tcp:%s:%d*%s/%s/%s", ip, port, name, id, pw)
+	case "odbc":
+		connString = fmt.Sprintf("DSN=%s;UID=%s;PWD=%s", name, id, pw)
 	default:
-		panic("Unsupported driver (by ip) : " + driver)
+		panic("Unsupported driver : " + driver)
 	}
 	return CreateDBPoolByConnString(driver, connString, poolSize)
 }

@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	_ "github.com/alexbrainman/odbc"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
@@ -45,7 +46,7 @@ type Rows struct {
 	inst    *sql.Rows
 	isFirst bool
 	isNil   bool
-	Cols []string
+	Cols    []string
 }
 
 func (db *Database) prepare(queryStr string, retCount int) (*sql.Stmt, error) {
@@ -80,7 +81,7 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 		db.executeOpen()
 		return db.TempQuery(queryStr)
 	}
-	
+
 	rows.Cols, err = rows.inst.Columns()
 
 	if !rows.inst.Next() {
