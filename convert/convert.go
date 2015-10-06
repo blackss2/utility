@@ -98,7 +98,11 @@ func String(val interface{}) string {
 	case nil:
 		return ""
 	default:
-		return fmt.Sprintf("%v", val)
+		if val == nil {
+			return ""
+		} else {
+			return fmt.Sprintf("%v", val)
+		}
 	}
 }
 
@@ -114,4 +118,28 @@ func SHA256(src string) string {
 	hasher := sha256.New()
 	hasher.Write([]byte(src))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func Time(val interface{}) *time.Time {
+	if val != nil {
+		v := String(val)
+		if len(v) > 0 {
+			if t, err := time.Parse("2006-01-02 15:04:05.000", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("2006-01-02 15:04:05", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("2006-01-02", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("01-02-06", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("01-02-2006", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("15:04:05.000", v); err == nil {
+				return &t
+			} else if t, err := time.Parse("15:04:05", v); err == nil {
+				return &t
+			}
+		}
+	}
+	return nil
 }
