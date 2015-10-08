@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/alexbrainman/odbc"
+	"github.com/blackss2/utility/convert"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
@@ -184,7 +185,13 @@ func (rows *Rows) FetchArray() []interface{} {
 	rows.inst.Scan(dest...)
 	for i, raw := range rawResult {
 		if raw != nil {
-			result[i] = (*raw)
+			v := (*raw)
+			switch v.(type) {
+			case []byte:
+				result[i] = convert.String(v)
+			default:
+				result[i] = v
+			}
 		} else {
 			result[i] = nil
 		}
