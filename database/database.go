@@ -5,6 +5,7 @@ import (
 	"errors"
 	_ "github.com/alexbrainman/odbc"
 	"github.com/blackss2/utility/convert"
+	"github.com/cznic/ql"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
@@ -14,6 +15,7 @@ import (
 
 type Database struct {
 	inst       *sql.DB
+	instQL     *ql.DB
 	connString string
 	driver     string
 }
@@ -29,22 +31,33 @@ func (db *Database) Open(driver string, connString string) error {
 
 func (db *Database) executeOpen() error {
 	var err error
-	db.inst, err = sql.Open(db.driver, db.connString)
-	if err != nil {
-		return err
+	if db.driver == "ql" {
+		if db.connString == "mem" {
+			db.instQL, err = ql.OpenMem()
+		} else {
+			db.instQL, err = ql.OpenFile(db.connString, nil)
+		}
+	} else {
+		db.inst, err = sql.Open(db.driver, db.connString)
 	}
-	return nil
+	return err
 }
 
 func (db *Database) Close() error {
+	var err error
+
 	if db.inst != nil {
-		return db.inst.Close()
+		err = db.inst.Close()
+	} else if db.instQL != nil {
+		err = db.instQL.Close()
 	}
-	return nil
+	return err
 }
 
 type Rows struct {
 	inst    *sql.Rows
+	qlRows  [][]interface{}
+	qlIndex int
 	isFirst bool
 	isNil   bool
 	Cols    []string
@@ -64,40 +77,69 @@ func (db *Database) prepare(queryStr string, retCount int) (*sql.Stmt, error) {
 }
 
 func (db *Database) Query(queryStr string) (*Rows, error) {
-	stmt, err := db.prepare(queryStr, 1)
-	if stmt != nil {
-		defer stmt.Close()
-	}
-	if err != nil {
-		db.Close()
-		db.executeOpen()
-		return db.TempQuery(queryStr)
-	}
+	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
-	rows := &Rows{nil, true, false, make([]string, 0, 100)}
-	rows.inst, err = stmt.Query()
-
-	if err != nil {
-		if err.Error() != "Stmt did not create a result set" {
+	if db.inst != nil {
+		stmt, err := db.prepare(queryStr, 1)
+		if stmt != nil {
+			defer stmt.Close()
+		}
+		if err != nil {
 			db.Close()
 			db.executeOpen()
 			return db.TempQuery(queryStr)
+		}
+		rows.inst, err = stmt.Query()
+
+		if err != nil {
+			if err.Error() != "Stmt did not create a result set" {
+				db.Close()
+				db.executeOpen()
+				return db.TempQuery(queryStr)
+			} else {
+				runtime.SetFinalizer(rows, func(f interface{}) {
+					f.(*Rows).Close()
+				})
+				return rows, nil
+			}
+		}
+
+		rows.Cols, err = rows.inst.Columns()
+
+		if !rows.inst.Next() {
+			rows.Close()
 		} else {
 			runtime.SetFinalizer(rows, func(f interface{}) {
 				f.(*Rows).Close()
 			})
+		}
+	} else if db.instQL != nil {
+		ctx := ql.NewRWCtx()
+		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
+		if err != nil {
+			db.Close()
+			db.executeOpen()
+			return db.TempQuery(queryStr)
+		}
+
+		if len(rs) == 0 {
+			rows.isNil = true
+			rows.isFirst = false
 			return rows, nil
 		}
-	}
 
-	rows.Cols, err = rows.inst.Columns()
+		rows.Cols, err = rs[0].Fields()
 
-	if !rows.inst.Next() {
-		rows.Close()
+		rows.qlRows, err = rs[0].Rows(-1, -1)
+		if len(rows.qlRows) == 0 || err != nil {
+			rows.Close()
+		} else {
+			runtime.SetFinalizer(rows, func(f interface{}) {
+				f.(*Rows).Close()
+			})
+		}
 	} else {
-		runtime.SetFinalizer(rows, func(f interface{}) {
-			f.(*Rows).Close()
-		})
+		return nil, errors.New("db is not initialized")
 	}
 
 	QUERYSTR := strings.ToUpper(queryStr)
@@ -106,43 +148,74 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 			return nil, errors.New("insert.fail")
 		}
 	}
-
 	return rows, nil
 }
 
 func (db *Database) TempQuery(queryStr string) (*Rows, error) {
-	stmt, err := db.prepare(queryStr, 1)
-	if stmt != nil {
-		defer stmt.Close()
-	}
-	if err != nil {
-		println("P1 : ", err.Error())
-		return nil, err
-	}
+	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
-	rows := &Rows{nil, true, false, make([]string, 0, 100)}
-	rows.inst, err = stmt.Query()
+	if db.inst != nil {
+		stmt, err := db.prepare(queryStr, 1)
+		if stmt != nil {
+			defer stmt.Close()
+		}
+		if err != nil {
+			println("P1 : ", err.Error())
+			return nil, err
+		}
+		rows.inst, err = stmt.Query()
 
-	if err != nil {
-		if err.Error() != "Stmt did not create a result set" {
+		if err != nil {
+			if err.Error() != "Stmt did not create a result set" {
+				println("P2 : ", err.Error(), "\n", queryStr)
+				return nil, err
+			} else {
+				runtime.SetFinalizer(rows, func(f interface{}) {
+					f.(*Rows).Close()
+				})
+				return rows, nil
+			}
+		}
+
+		rows.Cols, err = rows.inst.Columns()
+		if err != nil {
 			println("P2 : ", err.Error(), "\n", queryStr)
 			return nil, err
+		}
+
+		if !rows.inst.Next() {
+			rows.Close()
 		} else {
 			runtime.SetFinalizer(rows, func(f interface{}) {
 				f.(*Rows).Close()
 			})
+		}
+	} else if db.instQL != nil {
+		ctx := ql.NewRWCtx()
+		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
+		if err != nil {
+			println("P1 : ", err.Error())
+			return nil, err
+		}
+
+		if len(rs) == 0 {
+			rows.isNil = true
+			rows.isFirst = false
 			return rows, nil
 		}
-	}
 
-	rows.Cols, err = rows.inst.Columns()
+		rows.Cols, err = rs[0].Fields()
 
-	if !rows.inst.Next() {
-		rows.Close()
+		rows.qlRows, err = rs[0].Rows(-1, -1)
+		if len(rows.qlRows) == 0 || err != nil {
+			rows.Close()
+		} else {
+			runtime.SetFinalizer(rows, func(f interface{}) {
+				f.(*Rows).Close()
+			})
+		}
 	} else {
-		runtime.SetFinalizer(rows, func(f interface{}) {
-			f.(*Rows).Close()
-		})
+		return nil, errors.New("db is not initialized")
 	}
 
 	QUERYSTR := strings.ToUpper(queryStr)
@@ -160,8 +233,17 @@ func (rows *Rows) Next() bool {
 		rows.isFirst = false
 		return true
 	}
-	if !rows.inst.Next() {
-		rows.Close()
+	if rows.inst != nil {
+		if !rows.inst.Next() {
+			rows.Close()
+		}
+	} else if rows.qlRows != nil {
+		rows.qlIndex++
+		if len(rows.qlRows) <= rows.qlIndex {
+			rows.Close()
+		}
+	} else {
+		return false
 	}
 	return !rows.isNil
 }
@@ -170,32 +252,42 @@ func (rows *Rows) FetchArray() []interface{} {
 	if rows.isNil {
 		return nil
 	}
-	cols, err := rows.inst.Columns()
-	if err != nil {
+	if rows.inst != nil {
+		cols, err := rows.inst.Columns()
+		if err != nil {
+			return nil
+		}
+
+		rawResult := make([]*interface{}, len(cols))
+		result := make([]interface{}, len(cols))
+
+		dest := make([]interface{}, len(cols))
+		for i, _ := range rawResult {
+			dest[i] = &rawResult[i]
+		}
+		rows.inst.Scan(dest...)
+		for i, raw := range rawResult {
+			if raw != nil {
+				v := (*raw)
+				switch v.(type) {
+				case []byte:
+					v = convert.String(v)
+				}
+				result[i] = v
+			} else {
+				result[i] = nil
+			}
+		}
+		return result
+	} else if rows.qlRows != nil {
+		if len(rows.qlRows) <= rows.qlIndex {
+			return nil
+		}
+		return rows.qlRows[rows.qlIndex]
+	} else {
 		return nil
 	}
 
-	rawResult := make([]*interface{}, len(cols))
-	result := make([]interface{}, len(cols))
-
-	dest := make([]interface{}, len(cols))
-	for i, _ := range rawResult {
-		dest[i] = &rawResult[i]
-	}
-	rows.inst.Scan(dest...)
-	for i, raw := range rawResult {
-		if raw != nil {
-			v := (*raw)
-			switch v.(type) {
-			case []byte:
-				v = convert.String(v)
-			}
-			result[i] = v
-		} else {
-			result[i] = nil
-		}
-	}
-	return result
 }
 
 func (rows *Rows) FetchHash() map[string]interface{} {
@@ -207,37 +299,30 @@ func (rows *Rows) FetchHash() map[string]interface{} {
 		return nil
 	}
 
-	rawResult := make([]*interface{}, len(cols))
 	result := make(map[string]interface{}, len(cols))
 
-	dest := make([]interface{}, len(cols))
-	for i, _ := range rawResult {
-		dest[i] = &rawResult[i]
-	}
-	rows.inst.Scan(dest...)
-	for i, raw := range rawResult {
-		if raw != nil {
-			v := (*raw)
+	row := rows.FetchArray()
+
+	for i, v := range row {
+		if v != nil {
 			switch v.(type) {
 			case []byte:
 				v = convert.String(v)
 			}
-			result[cols[i]] = v
-			result[strings.ToUpper(cols[i])] = v
-			result[strings.ToLower(cols[i])] = v
-		} else {
-			result[cols[i]] = nil
-			result[strings.ToUpper(cols[i])] = nil
-			result[strings.ToLower(cols[i])] = nil
 		}
+		result[cols[i]] = v
+		result[strings.ToUpper(cols[i])] = v
+		result[strings.ToLower(cols[i])] = v
 	}
 	return result
 }
 
 func (rows *Rows) Close() error {
-	if rows != nil && rows.inst != nil {
+	if rows != nil {
 		rows.isNil = true
-		return rows.inst.Close()
+		if rows.inst != nil {
+			return rows.inst.Close()
+		}
 	}
 	return nil
 }
