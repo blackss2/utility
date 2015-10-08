@@ -42,13 +42,24 @@ func CreateDBPoolByConnString(driver string, connString string, poolSize int) *D
 }
 
 func (p *DBPool) fill() error {
-	for len(p.dbQueue) < p.poolSize {
+	if p.driver == "ql" {
 		db := new(Database)
 		err := db.Open(p.driver, p.connString)
 		if err != nil {
 			return err
 		}
-		p.dbQueue <- db
+		for len(p.dbQueue) < p.poolSize {
+			p.dbQueue <- db
+		}
+	} else {
+		for len(p.dbQueue) < p.poolSize {
+			db := new(Database)
+			err := db.Open(p.driver, p.connString)
+			if err != nil {
+				return err
+			}
+			p.dbQueue <- db
+		}
 	}
 	return nil
 }

@@ -128,9 +128,8 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 		ctx := ql.NewRWCtx()
 		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
 		if err != nil {
-			db.Close()
-			db.executeOpen()
-			return db.TempQuery(queryStr)
+			println("P1 : ", err.Error(), "\n", queryStr)
+			return nil, err
 		}
 
 		if len(rs) == 0 {
@@ -201,29 +200,7 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 			})
 		}
 	} else if db.instQL != nil {
-		ctx := ql.NewRWCtx()
-		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
-		if err != nil {
-			println("P1 : ", err.Error(), "\n", queryStr)
-			return nil, err
-		}
-
-		if len(rs) == 0 {
-			rows.isNil = true
-			rows.isFirst = false
-			return rows, nil
-		}
-
-		rows.Cols, err = rs[0].Fields()
-
-		rows.qlRows, err = rs[0].Rows(-1, -1)
-		if len(rows.qlRows) == 0 || err != nil {
-			rows.Close()
-		} else {
-			runtime.SetFinalizer(rows, func(f interface{}) {
-				f.(*Rows).Close()
-			})
-		}
+		return nil, errors.New("ql not use TempQuery")
 	} else {
 		return nil, errors.New("db is not initialized")
 	}
