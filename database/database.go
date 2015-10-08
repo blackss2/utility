@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	_ "github.com/alexbrainman/odbc"
 	"github.com/blackss2/utility/convert"
 	"github.com/cznic/ql"
@@ -79,6 +80,8 @@ func (db *Database) prepare(queryStr string, retCount int) (*sql.Stmt, error) {
 func (db *Database) Query(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
+	QUERYSTR := strings.ToUpper(queryStr)
+	
 	if db.inst != nil {
 		stmt, err := db.prepare(queryStr, 1)
 		if stmt != nil {
@@ -114,6 +117,14 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 			})
 		}
 	} else if db.instQL != nil {
+		if !strings.Contains(QUERYSTR, "TRANSACTION") && (strings.Contains(QUERYSTR, "INSERT") || strings.Contains(QUERYSTR, "CREATE") || strings.Contains(QUERYSTR, "UPDATE") || strings.Contains(QUERYSTR, "DELETE")) {
+			queryStr = fmt.Sprintf(`
+				BEGIN TRANSACTION;
+					%s;
+				COMMIT;
+			`, queryStr)
+		}
+
 		ctx := ql.NewRWCtx()
 		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
 		if err != nil {
@@ -142,7 +153,6 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 		return nil, errors.New("db is not initialized")
 	}
 
-	QUERYSTR := strings.ToUpper(queryStr)
 	if strings.HasPrefix(QUERYSTR, "INSERT") && strings.Contains(QUERYSTR, "OUTPUT") && strings.Contains(QUERYSTR, "INSERTED.") {
 		if rows.IsNil() {
 			return nil, errors.New("insert.fail")
