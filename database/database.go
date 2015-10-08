@@ -81,7 +81,7 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
 	QUERYSTR := strings.ToUpper(queryStr)
-	
+
 	if db.inst != nil {
 		stmt, err := db.prepare(queryStr, 1)
 		if stmt != nil {
@@ -204,7 +204,7 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 		ctx := ql.NewRWCtx()
 		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
 		if err != nil {
-			println("P1 : ", err.Error())
+			println("P1 : ", err.Error(), "\n", queryStr)
 			return nil, err
 		}
 
