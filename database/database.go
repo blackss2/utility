@@ -43,7 +43,7 @@ func (db *Database) executeOpen() error {
 
 			filepath.Walk("./", func(path string, fi os.FileInfo, err error) error {
 				if !fi.IsDir() {
-					if fi.Size() == 0 && len(fi.Name()) == 41 && fi.Name()[0] == "." {
+					if fi.Size() == 0 && len(fi.Name()) == 41 && fi.Name()[0] == '.' {
 						os.Remove(path)
 					}
 				}
