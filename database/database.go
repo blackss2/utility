@@ -188,10 +188,9 @@ func (rows *Rows) FetchArray() []interface{} {
 			v := (*raw)
 			switch v.(type) {
 			case []byte:
-				result[i] = convert.String(v)
-			default:
-				result[i] = v
+				v = convert.String(v)
 			}
+			result[i] = v
 		} else {
 			result[i] = nil
 		}
@@ -218,9 +217,14 @@ func (rows *Rows) FetchHash() map[string]interface{} {
 	rows.inst.Scan(dest...)
 	for i, raw := range rawResult {
 		if raw != nil {
-			result[cols[i]] = (*raw)
-			result[strings.ToUpper(cols[i])] = (*raw)
-			result[strings.ToLower(cols[i])] = (*raw)
+			v := (*raw)
+			switch v.(type) {
+			case []byte:
+				v = convert.String(v)
+			}
+			result[cols[i]] = v
+			result[strings.ToUpper(cols[i])] = v
+			result[strings.ToLower(cols[i])] = v
 		} else {
 			result[cols[i]] = nil
 			result[strings.ToUpper(cols[i])] = nil
