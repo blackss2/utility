@@ -36,7 +36,9 @@ func (db *Database) executeOpen() error {
 		if db.connString == "mem" {
 			db.instQL, err = ql.OpenMem()
 		} else {
-			db.instQL, err = ql.OpenFile(db.connString, nil)
+			opt := &ql.Options{}
+			opt.CanCreate = true
+			db.instQL, err = ql.OpenFile(db.connString, opt)
 		}
 	} else {
 		db.inst, err = sql.Open(db.driver, db.connString)
