@@ -10,6 +10,8 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -38,6 +40,16 @@ func (db *Database) executeOpen() error {
 		} else {
 			opt := &ql.Options{}
 			opt.CanCreate = true
+
+			filepath.Walk("./", func(path string, fi *os.FileInfo, err error) error {
+				if !fi.IsDir() {
+					if fi.Size() == 0 && len(fi.Name()) == 41 && fi.Name()[0] == "." {
+						os.Remove(path)
+					}
+				}
+				return nil
+			})
+
 			db.instQL, err = ql.OpenFile(db.connString, opt)
 		}
 	} else {
