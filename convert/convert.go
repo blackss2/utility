@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/suapapa/go_hangul/encoding/cp949"
 	"strconv"
 	"strings"
 	"time"
@@ -142,4 +143,38 @@ func Time(val interface{}) *time.Time {
 		}
 	}
 	return nil
+}
+
+func UTF8(ustr string) (str string) {
+	defer func() {
+		if r := recover(); r != nil {
+			ustr = str
+			return
+		}
+	}()
+
+	bytes, err := cp949.From([]byte(ustr))
+	if err != nil {
+		str = ustr
+	} else {
+		str = string(bytes)
+	}
+	return
+}
+
+func EUCKR(str string) (ustr string) {
+	defer func() {
+		if r := recover(); r != nil {
+			ustr = str
+			return
+		}
+	}()
+
+	ubytes, err := cp949.To([]byte(str))
+	if err != nil {
+		ustr = str
+	} else {
+		ustr = string(ubytes)
+	}
+	return
 }
