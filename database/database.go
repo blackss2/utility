@@ -58,7 +58,9 @@ func (db *Database) executeOpen() error {
 	}
 	if err == nil && len(db.postConnect) > 0 {
 		for _, v := range db.postConnect {
+			fmt.Println("run", v)
 			db.TempQuery(v)
+			fmt.Println("ran", v)
 		}
 	}
 	return err
