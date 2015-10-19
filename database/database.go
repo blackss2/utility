@@ -84,26 +84,13 @@ type Rows struct {
 	Cols    []string
 }
 
-func (db *Database) prepare(queryStr string, retCount int) (*sql.Stmt, error) {
-	stmt, err := db.inst.Prepare(queryStr)
-	if err != nil {
-		db.Close()
-		if retCount > 0 {
-			db.executeOpen()
-			return db.prepare(queryStr, retCount-1)
-		}
-		return nil, err
-	}
-	return stmt, err
-}
-
 func (db *Database) Query(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
 	QUERYSTR := strings.ToUpper(queryStr)
 
 	if db.inst != nil {
-		stmt, err := db.prepare(queryStr, 1)
+		stmt, err := db.inst.Prepare(queryStr)
 		if stmt != nil {
 			defer stmt.Close()
 		}
@@ -148,7 +135,7 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 		ctx := ql.NewRWCtx()
 		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
 		if err != nil {
-			println("P1 : ", err.Error(), "\n", queryStr)
+			//println("P1 : ", err.Error(), "\n", queryStr)
 			return nil, err
 		}
 
@@ -184,19 +171,19 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
 
 	if db.inst != nil {
-		stmt, err := db.prepare(queryStr, 1)
+		stmt, err := db.inst.Prepare(queryStr)
 		if stmt != nil {
 			defer stmt.Close()
 		}
 		if err != nil {
-			println("P1 : ", err.Error())
+			//println("P1 : ", err.Error())
 			return nil, err
 		}
 		rows.inst, err = stmt.Query()
 
 		if err != nil {
 			if err.Error() != "Stmt did not create a result set" {
-				println("P2 : ", err.Error(), "\n", queryStr)
+				//println("P2 : ", err.Error(), "\n", queryStr)
 				return nil, err
 			} else {
 				runtime.SetFinalizer(rows, func(f interface{}) {
@@ -208,7 +195,7 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 
 		rows.Cols, err = rows.inst.Columns()
 		if err != nil {
-			println("P2 : ", err.Error(), "\n", queryStr)
+			//println("P2 : ", err.Error(), "\n", queryStr)
 			return nil, err
 		}
 
