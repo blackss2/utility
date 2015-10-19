@@ -56,9 +56,9 @@ func (db *Database) executeOpen() error {
 	} else {
 		db.inst, err = sql.Open(db.driver, db.connString)
 	}
-	if err == nil && len(db.postConnect) > 0 {
+	if err != nil && len(db.postConnect) > 0 {
 		for _, v := range db.postConnect {
-			db.TempQuery(v)
+			db.Query(v)
 		}
 	}
 	return err
