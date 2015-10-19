@@ -88,8 +88,8 @@ func (db *Database) prepare(queryStr string, retCount int) (*sql.Stmt, error) {
 	stmt, err := db.inst.Prepare(queryStr)
 	if err != nil {
 		db.Close()
-		db.executeOpen()
 		if retCount > 0 {
+			db.executeOpen()
 			return db.prepare(queryStr, retCount-1)
 		}
 		return nil, err
