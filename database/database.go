@@ -17,11 +17,10 @@ import (
 )
 
 type Database struct {
-	inst        *sql.DB
-	instQL      *ql.DB
-	connString  string
-	driver      string
-	postConnect []string
+	inst       *sql.DB
+	instQL     *ql.DB
+	connString string
+	driver     string
 }
 
 func (db *Database) Open(driver string, connString string) error {
@@ -55,11 +54,6 @@ func (db *Database) executeOpen() error {
 		}
 	} else {
 		db.inst, err = sql.Open(db.driver, db.connString)
-	}
-	if err != nil && len(db.postConnect) > 0 {
-		for _, v := range db.postConnect {
-			db.Query(v)
-		}
 	}
 	return err
 }
