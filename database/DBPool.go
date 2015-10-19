@@ -70,9 +70,7 @@ func (p *DBPool) AddPostConnect(v string) {
 }
 
 func (p *DBPool) GetDB() *Database {
-	db := <-p.dbQueue
-	db.postConnect = p.PostConnect
-	return db
+	return <-p.dbQueue
 }
 
 func (p *DBPool) ReleaseDB(db *Database) {
