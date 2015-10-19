@@ -5,10 +5,11 @@ import (
 )
 
 type DBPool struct {
-	driver     string
-	connString string
-	poolSize   int
-	dbQueue    chan *Database
+	driver      string
+	connString  string
+	poolSize    int
+	dbQueue     chan *Database
+	PostConnect []string
 }
 
 func CreateDBPool(driver string, ip string, port int, name string, id string, pw string, poolSize int) *DBPool {
@@ -32,7 +33,7 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 }
 
 func CreateDBPoolByConnString(driver string, connString string, poolSize int) *DBPool {
-	pool := &DBPool{driver, connString, poolSize, make(chan *Database, poolSize)}
+	pool := &DBPool{driver, connString, poolSize, make(chan *Database, poolSize), make([]string, 0)}
 	err := pool.fill()
 	if err != nil {
 		fmt.Println(err)
@@ -64,8 +65,14 @@ func (p *DBPool) fill() error {
 	return nil
 }
 
+func (p *DBPool) AddPostConnect(v string) {
+	p.PostConnect = append(p.PostConnect, v)
+}
+
 func (p *DBPool) GetDB() *Database {
-	return <-p.dbQueue
+	db := <-p.dbQueue
+	db.postConnect = p.PostConnect
+	return db
 }
 
 func (p *DBPool) ReleaseDB(db *Database) {
