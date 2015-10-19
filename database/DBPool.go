@@ -32,7 +32,7 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 }
 
 func CreateDBPoolByConnString(driver string, connString string, poolSize int) *DBPool {
-	pool := &DBPool{driver, connString, poolSize, make(chan *Database, poolSize), make([]string, 0)}
+	pool := &DBPool{driver, connString, poolSize, make(chan *Database, poolSize)}
 	err := pool.fill()
 	if err != nil {
 		fmt.Println(err)
