@@ -272,7 +272,7 @@ func (rows *Rows) FetchArray() []interface{} {
 				if rows.isForceUTF8 {
 					switch v.(type) {
 					case string:
-						v = convert.UTF8(v)
+						v = convert.UTF8(v.(string))
 					}
 				}
 				result[i] = v
@@ -314,7 +314,7 @@ func (rows *Rows) FetchHash() map[string]interface{} {
 			if rows.isForceUTF8 {
 				switch v.(type) {
 				case string:
-					v = convert.UTF8(v)
+					v = convert.UTF8(v.(string))
 				}
 			}
 		}
