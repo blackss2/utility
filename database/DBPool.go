@@ -10,6 +10,7 @@ type DBPool struct {
 	poolSize    int
 	dbQueue     chan *Database
 	PostConnect []string
+	IsForceUTF8 bool
 }
 
 func CreateDBPool(driver string, ip string, port int, name string, id string, pw string, poolSize int) *DBPool {
@@ -72,6 +73,7 @@ func (p *DBPool) AddPostConnect(v string) {
 func (p *DBPool) GetDB() *Database {
 	db := <-p.dbQueue
 	db.postConnect = p.PostConnect
+	db.isForceUTF8 = p.IsForceUTF8
 	return db
 }
 

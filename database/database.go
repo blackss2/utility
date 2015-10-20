@@ -22,6 +22,7 @@ type Database struct {
 	connString  string
 	driver      string
 	postConnect []string
+	isForceUTF8 bool
 }
 
 func (db *Database) Open(driver string, connString string) error {
@@ -76,16 +77,17 @@ func (db *Database) Close() error {
 }
 
 type Rows struct {
-	inst    *sql.Rows
-	qlRows  [][]interface{}
-	qlIndex int
-	isFirst bool
-	isNil   bool
-	Cols    []string
+	inst        *sql.Rows
+	qlRows      [][]interface{}
+	qlIndex     int
+	isFirst     bool
+	isNil       bool
+	Cols        []string
+	isForceUTF8 bool
 }
 
 func (db *Database) Query(queryStr string) (*Rows, error) {
-	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
+	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
 
 	QUERYSTR := strings.ToUpper(queryStr)
 
@@ -168,7 +170,7 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 }
 
 func (db *Database) TempQuery(queryStr string) (*Rows, error) {
-	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100)}
+	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
 
 	if db.inst != nil {
 		stmt, err := db.inst.Prepare(queryStr)
@@ -267,6 +269,12 @@ func (rows *Rows) FetchArray() []interface{} {
 				case []byte:
 					v = convert.String(v)
 				}
+				if rows.isForceUTF8 {
+					switch v.(type) {
+					case string:
+						v = convert.UTF8(v)
+					}
+				}
 				result[i] = v
 			} else {
 				result[i] = nil
@@ -302,6 +310,12 @@ func (rows *Rows) FetchHash() map[string]interface{} {
 			switch v.(type) {
 			case []byte:
 				v = convert.String(v)
+			}
+			if rows.isForceUTF8 {
+				switch v.(type) {
+				case string:
+					v = convert.UTF8(v)
+				}
 			}
 		}
 		result[cols[i]] = v
