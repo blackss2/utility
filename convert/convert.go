@@ -96,6 +96,18 @@ func String(val interface{}) string {
 	case time.Time:
 		t := val.(time.Time)
 		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+	case float32:
+		if int64(val.(float32)*1000000) == int64(val.(float32))*1000000 {
+			return fmt.Sprintf("%v", int64(val.(float32)))
+		} else {
+			return fmt.Sprintf("%v", val)
+		}
+	case float64:
+		if int64(val.(float64)*1000000) == int64(val.(float64))*1000000 {
+			return fmt.Sprintf("%v", int64(val.(float64)))
+		} else {
+			return fmt.Sprintf("%v", val)
+		}
 	case nil:
 		return ""
 	default:
