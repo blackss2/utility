@@ -143,6 +143,10 @@ func Time(val interface{}) *time.Time {
 				return &t
 			} else if t, err := time.Parse("2006-01-02", v); err == nil && t.Year() > 0 {
 				return &t
+			} else if t, err := time.Parse("20060102150405", v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("20060102", v); err == nil && t.Year() > 0 {
+				return &t
 			} else if t, err := time.Parse("01-02-06", v); err == nil && t.Year() > 0 {
 				return &t
 			} else if t, err := time.Parse("01-02-2006", v); err == nil && t.Year() > 0 {
