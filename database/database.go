@@ -3,15 +3,15 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"fmt"
+	//"fmt"
 	_ "github.com/alexbrainman/odbc"
 	"github.com/blackss2/utility/convert"
 	//"github.com/cznic/ql"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
-	"os"
-	"path/filepath"
+	//"os"
+	//"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -95,7 +95,8 @@ type Rows struct {
 }
 
 func (db *Database) Query(queryStr string) (*Rows, error) {
-	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
+	//rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
+	rows := &Rows{nil, true, false, make([]string, 0, 100), db.isForceUTF8}
 
 	QUERYSTR := strings.ToUpper(queryStr)
 
@@ -180,7 +181,8 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 }
 
 func (db *Database) TempQuery(queryStr string) (*Rows, error) {
-	rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
+	//rows := &Rows{nil, nil, 0, true, false, make([]string, 0, 100), db.isForceUTF8}
+	rows := &Rows{nil, true, false, make([]string, 0, 100), db.isForceUTF8}
 
 	if db.inst != nil {
 		stmt, err := db.inst.Prepare(queryStr)
