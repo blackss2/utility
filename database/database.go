@@ -6,7 +6,7 @@ import (
 	"fmt"
 	_ "github.com/alexbrainman/odbc"
 	"github.com/blackss2/utility/convert"
-	"github.com/cznic/ql"
+	//"github.com/cznic/ql"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
@@ -17,8 +17,8 @@ import (
 )
 
 type Database struct {
-	inst        *sql.DB
-	instQL      *ql.DB
+	inst *sql.DB
+	//instQL      *ql.DB
 	connString  string
 	driver      string
 	postConnect []string
@@ -36,27 +36,31 @@ func (db *Database) Open(driver string, connString string) error {
 
 func (db *Database) executeOpen() error {
 	var err error
-	if db.driver == "ql" {
-		if db.connString == "mem" {
-			db.instQL, err = ql.OpenMem()
-		} else {
-			opt := &ql.Options{}
-			opt.CanCreate = true
+	/*
+		if db.driver == "ql" {
+			if db.connString == "mem" {
+				db.instQL, err = ql.OpenMem()
+			} else {
+				opt := &ql.Options{}
+				opt.CanCreate = true
 
-			filepath.Walk("./", func(path string, fi os.FileInfo, err error) error {
-				if !fi.IsDir() && filepath.Dir(path) == "." {
-					if len(fi.Name()) == 41 && fi.Name()[0] == '.' {
-						os.Remove(path)
+				filepath.Walk("./", func(path string, fi os.FileInfo, err error) error {
+					if !fi.IsDir() && filepath.Dir(path) == "." {
+						if len(fi.Name()) == 41 && fi.Name()[0] == '.' {
+							os.Remove(path)
+						}
 					}
-				}
-				return nil
-			})
+					return nil
+				})
 
-			db.instQL, err = ql.OpenFile(db.connString, opt)
+				db.instQL, err = ql.OpenFile(db.connString, opt)
+			}
+		} else {
+	*/
+	db.inst, err = sql.Open(db.driver, db.connString)
+	/*
 		}
-	} else {
-		db.inst, err = sql.Open(db.driver, db.connString)
-	}
+	*/
 	if err == nil && len(db.postConnect) > 0 {
 		for _, v := range db.postConnect {
 			db.TempQuery(v)
@@ -70,16 +74,20 @@ func (db *Database) Close() error {
 
 	if db.inst != nil {
 		err = db.inst.Close()
-	} else if db.instQL != nil {
-		err = db.instQL.Close()
+		/*
+			} else if db.instQL != nil {
+				err = db.instQL.Close()
+		*/
 	}
 	return err
 }
 
 type Rows struct {
-	inst        *sql.Rows
-	qlRows      [][]interface{}
-	qlIndex     int
+	inst *sql.Rows
+	/*
+		qlRows      [][]interface{}
+		qlIndex     int
+	*/
 	isFirst     bool
 	isNil       bool
 	Cols        []string
@@ -125,38 +133,40 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 				f.(*Rows).Close()
 			})
 		}
-	} else if db.instQL != nil {
-		if !strings.Contains(QUERYSTR, "TRANSACTION") && (strings.Contains(QUERYSTR, "INSERT") || strings.Contains(QUERYSTR, "CREATE") || strings.Contains(QUERYSTR, "UPDATE") || strings.Contains(QUERYSTR, "DELETE")) {
-			queryStr = fmt.Sprintf(`
-				BEGIN TRANSACTION;
-					%s;
-				COMMIT;
-			`, queryStr)
-		}
+		/*
+			} else if db.instQL != nil {
+				if !strings.Contains(QUERYSTR, "TRANSACTION") && (strings.Contains(QUERYSTR, "INSERT") || strings.Contains(QUERYSTR, "CREATE") || strings.Contains(QUERYSTR, "UPDATE") || strings.Contains(QUERYSTR, "DELETE")) {
+					queryStr = fmt.Sprintf(`
+						BEGIN TRANSACTION;
+							%s;
+						COMMIT;
+					`, queryStr)
+				}
 
-		ctx := ql.NewRWCtx()
-		rs, _, err := db.instQL.Run(ctx, queryStr, nil)
-		if err != nil {
-			//println("P1 : ", err.Error(), "\n", queryStr)
-			return nil, err
-		}
+				ctx := ql.NewRWCtx()
+				rs, _, err := db.instQL.Run(ctx, queryStr, nil)
+				if err != nil {
+					//println("P1 : ", err.Error(), "\n", queryStr)
+					return nil, err
+				}
 
-		if len(rs) == 0 {
-			rows.isNil = true
-			rows.isFirst = false
-			return rows, nil
-		}
+				if len(rs) == 0 {
+					rows.isNil = true
+					rows.isFirst = false
+					return rows, nil
+				}
 
-		rows.Cols, err = rs[0].Fields()
+				rows.Cols, err = rs[0].Fields()
 
-		rows.qlRows, err = rs[0].Rows(-1, -1)
-		if len(rows.qlRows) == 0 || err != nil {
-			rows.Close()
-		} else {
-			runtime.SetFinalizer(rows, func(f interface{}) {
-				f.(*Rows).Close()
-			})
-		}
+				rows.qlRows, err = rs[0].Rows(-1, -1)
+				if len(rows.qlRows) == 0 || err != nil {
+					rows.Close()
+				} else {
+					runtime.SetFinalizer(rows, func(f interface{}) {
+						f.(*Rows).Close()
+					})
+				}
+		*/
 	} else {
 		return nil, errors.New("db is not initialized")
 	}
@@ -208,8 +218,10 @@ func (db *Database) TempQuery(queryStr string) (*Rows, error) {
 				f.(*Rows).Close()
 			})
 		}
-	} else if db.instQL != nil {
-		return nil, errors.New("ql not use TempQuery")
+		/*
+			} else if db.instQL != nil {
+				return nil, errors.New("ql not use TempQuery")
+		*/
 	} else {
 		return nil, errors.New("db is not initialized")
 	}
@@ -233,11 +245,13 @@ func (rows *Rows) Next() bool {
 		if !rows.inst.Next() {
 			rows.Close()
 		}
-	} else if rows.qlRows != nil {
-		rows.qlIndex++
-		if len(rows.qlRows) <= rows.qlIndex {
-			rows.Close()
-		}
+		/*
+			} else if rows.qlRows != nil {
+				rows.qlIndex++
+				if len(rows.qlRows) <= rows.qlIndex {
+					rows.Close()
+				}
+		*/
 	} else {
 		return false
 	}
@@ -281,11 +295,13 @@ func (rows *Rows) FetchArray() []interface{} {
 			}
 		}
 		return result
-	} else if rows.qlRows != nil {
-		if len(rows.qlRows) <= rows.qlIndex {
-			return nil
-		}
-		return rows.qlRows[rows.qlIndex]
+		/*
+			} else if rows.qlRows != nil {
+				if len(rows.qlRows) <= rows.qlIndex {
+					return nil
+				}
+				return rows.qlRows[rows.qlIndex]
+		*/
 	} else {
 		return nil
 	}

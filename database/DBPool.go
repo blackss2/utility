@@ -25,8 +25,8 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 		connString = fmt.Sprintf("tcp:%s:%d*%s/%s/%s", ip, port, name, id, pw)
 	case "odbc":
 		connString = fmt.Sprintf("DSN=%s;UID=%s;PWD=%s", name, id, pw)
-	case "ql":
-		connString = name
+	//case "ql":
+	//	connString = name
 	default:
 		panic("Unsupported driver : " + driver)
 	}
