@@ -89,6 +89,8 @@ func FloatWith(val interface{}, defaultValue float64) float64 {
 
 func String(val interface{}) string {
 	switch val.(type) {
+	case nil:
+		return ""
 	case string:
 		return val.(string)
 	case []byte:
@@ -111,8 +113,6 @@ func String(val interface{}) string {
 		} else {
 			return fmt.Sprintf("%v", val)
 		}
-	case nil:
-		return ""
 	default:
 		if val == nil {
 			return ""
