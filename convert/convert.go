@@ -13,13 +13,13 @@ import (
 
 func Int(val interface{}) int64 {
 	if val != nil {
-		switch val.(type) {
+		switch v := val.(type) {
 		case float64:
-			return int64(val.(float64))
+			return int64(v)
 		case int64:
-			return val.(int64)
+			return v
 		default:
-			ret, err := strconv.ParseInt(String(val), 10, 64)
+			ret, err := strconv.ParseInt(String(v), 10, 64)
 			if err != nil {
 				return 0
 			} else {
@@ -88,28 +88,26 @@ func FloatWith(val interface{}, defaultValue float64) float64 {
 }
 
 func String(val interface{}) string {
-	switch val.(type) {
+	switch v := val.(type) {
 	case nil:
 		return ""
 	case string:
-		return val.(string)
+		return v
 	case []byte:
 		return string(val.([]byte))
 	case *time.Time:
-		t := val.(*time.Time)
-		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", v.Year(), v.Month(), v.Day(), v.Hour(), v.Minute(), v.Second())
 	case time.Time:
-		t := val.(time.Time)
-		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", v.Year(), v.Month(), v.Day(), v.Hour(), v.Minute(), v.Second())
 	case float32:
-		if int64(val.(float32)*1000000) == int64(val.(float32))*1000000 {
-			return fmt.Sprintf("%v", int64(val.(float32)))
+		if int64(v*1000000) == int64(v)*1000000 {
+			return fmt.Sprintf("%v", int64(v))
 		} else {
 			return fmt.Sprintf("%v", val)
 		}
 	case float64:
-		if int64(val.(float64)*1000000) == int64(val.(float64))*1000000 {
-			return fmt.Sprintf("%v", int64(val.(float64)))
+		if int64(v*1000000) == int64(v)*1000000 {
+			return fmt.Sprintf("%v", int64(v))
 		} else {
 			return fmt.Sprintf("%v", val)
 		}
