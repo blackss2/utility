@@ -93,6 +93,9 @@ func String(val interface{}) string {
 		return val.(string)
 	case []byte:
 		return string(val.([]byte))
+	case *time.Time:
+		t := val.(*time.Time)
+		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 	case time.Time:
 		t := val.(time.Time)
 		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
