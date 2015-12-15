@@ -169,6 +169,9 @@ func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int) {
 		buffer.WriteString("\n")
 	}
 	for _, v := range n.child {
+		if len(with) > 0 {
+			buffer.WriteString("\n")
+		}
 		v.writeWith(buffer, with, depth+1)
 	}
 	if n.name != "br" {
