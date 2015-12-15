@@ -101,7 +101,7 @@ func (n *HtmlNode) WriteWith(buffer *bytes.Buffer, with string) {
 	n.writeWith(buffer, with, 0)
 }
 
-func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int64) {
+func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int) {
 	if len(with) > 0 {
 		for i := 0; i < depth; i++ {
 			buffer.WriteString(with)
