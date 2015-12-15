@@ -180,6 +180,9 @@ func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int64) {
 		buffer.WriteString("</")
 		buffer.WriteString(n.name)
 		buffer.WriteString(">")
+		if len(with) > 0 {
+			buffer.WriteString("\n")
+		}
 	}
 }
 
