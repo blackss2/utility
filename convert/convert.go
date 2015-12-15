@@ -13,13 +13,13 @@ import (
 
 func Int(val interface{}) int64 {
 	if val != nil {
-		switch val.(type) {
+		switch v := val.(type) {
 		case float64:
-			return int64(val.(float64))
+			return int64(v)
 		case int64:
-			return val.(int64)
+			return v
 		default:
-			ret, err := strconv.ParseInt(String(val), 10, 64)
+			ret, err := strconv.ParseInt(String(v), 10, 64)
 			if err != nil {
 				return 0
 			} else {
@@ -32,13 +32,13 @@ func Int(val interface{}) int64 {
 
 func IntWith(val interface{}, defaultValue int64) int64 {
 	if val != nil {
-		switch val.(type) {
+		switch v := val.(type) {
 		case float64:
-			return int64(val.(float64))
+			return int64(v)
 		case int64:
-			return val.(int64)
+			return v
 		default:
-			ret, err := strconv.ParseInt(String(val), 10, 64)
+			ret, err := strconv.ParseInt(String(v), 10, 64)
 			if err != nil {
 				return defaultValue
 			} else {
@@ -51,13 +51,13 @@ func IntWith(val interface{}, defaultValue int64) int64 {
 
 func Float(val interface{}) float64 {
 	if val != nil {
-		switch val.(type) {
+		switch v := val.(type) {
 		case float64:
-			return val.(float64)
+			return v
 		case int64:
-			return float64(val.(int64))
+			return float64(v)
 		default:
-			ret, err := strconv.ParseFloat(String(val), 64)
+			ret, err := strconv.ParseFloat(String(v), 64)
 			if err != nil {
 				return 0
 			} else {
@@ -70,13 +70,13 @@ func Float(val interface{}) float64 {
 
 func FloatWith(val interface{}, defaultValue float64) float64 {
 	if val != nil {
-		switch val.(type) {
+		switch v := val.(type) {
 		case float64:
-			return val.(float64)
+			return v
 		case int64:
-			return float64(val.(int64))
+			return float64(v)
 		default:
-			ret, err := strconv.ParseFloat(String(val), 64)
+			ret, err := strconv.ParseFloat(String(v), 64)
 			if err != nil {
 				return defaultValue
 			} else {
@@ -88,21 +88,37 @@ func FloatWith(val interface{}, defaultValue float64) float64 {
 }
 
 func String(val interface{}) string {
-	switch val.(type) {
-	case string:
-		return val.(string)
-	case []byte:
-		return string(val.([]byte))
-	case time.Time:
-		t := val.(time.Time)
-		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+	switch v := val.(type) {
 	case nil:
 		return ""
+	case string:
+		return v
+	case []byte:
+		return string(v)
+	case *time.Time:
+		if v == nil {
+			return ""
+		}
+		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", v.Year(), v.Month(), v.Day(), v.Hour(), v.Minute(), v.Second())
+	case time.Time:
+		return fmt.Sprintf("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d", v.Year(), v.Month(), v.Day(), v.Hour(), v.Minute(), v.Second())
+	case float32:
+		if int64(v*1000000) == int64(v)*1000000 {
+			return fmt.Sprintf("%v", int64(v))
+		} else {
+			return fmt.Sprintf("%v", v)
+		}
+	case float64:
+		if int64(v*1000000) == int64(v)*1000000 {
+			return fmt.Sprintf("%v", int64(v))
+		} else {
+			return fmt.Sprintf("%v", v)
+		}
 	default:
-		if val == nil {
+		if v == nil {
 			return ""
 		} else {
-			return fmt.Sprintf("%v", val)
+			return fmt.Sprintf("%v", v)
 		}
 	}
 }
