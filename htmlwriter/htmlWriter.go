@@ -167,6 +167,11 @@ func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int) {
 		}
 		buffer.WriteString(n.text)
 		buffer.WriteString("\n")
+		if len(with) > 0 {
+			for i := 0; i < depth; i++ {
+				buffer.WriteString(with)
+			}
+		}
 	}
 	for _, v := range n.child {
 		if len(with) > 0 {
@@ -175,11 +180,6 @@ func (n *HtmlNode) writeWith(buffer *bytes.Buffer, with string, depth int) {
 		v.writeWith(buffer, with, depth+1)
 	}
 	if n.name != "br" {
-		if len(with) > 0 {
-			for i := 0; i < depth; i++ {
-				buffer.WriteString(with)
-			}
-		}
 		buffer.WriteString("</")
 		buffer.WriteString(n.name)
 		buffer.WriteString(">")
