@@ -10,6 +10,7 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/ziutek/mymysql/godrv"
+	_ "github.com/lib/pq"
 	//"os"
 	//"path/filepath"
 	"runtime"
