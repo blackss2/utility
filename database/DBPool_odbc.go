@@ -2,7 +2,6 @@ package database
 
 import (
 	_ "github.com/alexbrainman/odbc"
-	_ "github.com/lib/pq"
 	"reflect"
 	"strings"
 )
