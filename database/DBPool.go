@@ -26,7 +26,7 @@ func CreateDBPool(driver string, ip string, port int, name string, id string, pw
 	case "odbc":
 		connString = fmt.Sprintf("DSN=%s;UID=%s;PWD=%s", name, id, pw)
 	case "postgres":
-		connString = fmt.Sprintf("postgresql://%s@%s:%d/%s?connect_timeout=%d", id, ip, port, name, timeout)
+		connString = fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s connect_timeout=%d", ip, port, name, id, pw, timeout)
 	//case "ql":
 	//	connString = name
 	default:
