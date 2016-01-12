@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	<title>Agent | Cohort</title>
+
+	<!--=== CSS ===-->
+
+	<!-- Bootstrap -->
+	<link href="/public/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+
+	<!-- Theme -->
+	<link href="/public/assets/css/main.css" rel="stylesheet" type="text/css" />
+	<link href="/public/assets/css/plugins.css" rel="stylesheet" type="text/css" />
+	<link href="/public/assets/css/responsive.css" rel="stylesheet" type="text/css" />
+	<link href="/public/assets/css/icons.css" rel="stylesheet" type="text/css" />
+
+	<link rel="stylesheet" href="/public/assets/css/fontawesome/font-awesome.min.css">
+	<!--[if IE 7]>
+		<link rel="stylesheet" href="/public/assets/css/fontawesome/font-awesome-ie7.min.css">
+	<![endif]-->
+
+	<!--[if IE 8]>
+		<link href="/public/assets/css/ie8.css" rel="stylesheet" type="text/css" />
+	<![endif]-->
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+
+	<!--=== JavaScript ===-->
+
+	<script type="text/javascript" src="/public/assets/js/libs/jquery-1.10.2.min.js"></script>
+
+	<script type="text/javascript" src="/public/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/public/assets/js/libs/lodash.compat.min.js"></script>
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+		<script src="/public/assets/js/libs/html5shiv.js"></script>
+	<![endif]-->
+
+	<!-- Beautiful Checkboxes -->
+	<script type="text/javascript" src="/public/plugins/uniform/jquery.uniform.min.js"></script>
+</head>
+
+<style>
+	#subject-table td:nth-child(1) {min-width:50px; text-align:center; padding-top:8px;}
+	#subject-table td:nth-child(2) {min-width:50px;}
+</style>
+
+{{ $g := . }}
+<body class="login">
+	{{ if .isAdmin }}
+	<select id="select-school">
+		<option value=""></option>
+		{{ range .SchoolList }}
+		<option value="{{ .SCHOOLID }}">{{ .name }}</option>
+		{{ end }}
+	</select>
+	{{ else }}
+	<div style="display:block;">
+		<h4>공지사항</h4>
+		{{ if .Notice }}
+		<pre>{{ raw .Notice }}</pre>
+		{{ else }}
+		<pre>공지사항이 없습니다.</pre>
+		{{ end }}
+	</div>
+	{{ end }}
+	<div class="btn btn-default btn-request-fixture" style="display:inline-block;">조사지 추가 신청</div>
+	<div style="display:inline-block; font-weight:bold; color:red;">* 조사지를 추가 신청하려면 좌측의 조사지 추가 신청 버튼을 눌러주세요.</div><br>
+	<div class="btn btn-default btn-save-allocation" style="display:inline-block;">저장</div>
+	<div style="display:inline-block; font-weight:bold; color:red;">* 데이터 편집이 끝나면 반드시 좌측의 저장 버튼을 눌러주세요.</div>
+	{{ if .isAdmin }}
+	<div class="btn btn-default btn-export-allocation" style="display:inline-block;">추출</div>
+	{{ end }}
+	<br>
+	<div style="display:inline-block; font-weight:bold; color:red;">* 데이터 상태</div>
+	<div class="btn" style="display:inline-block; font-weight:bold; background-color:white;">입력가능</div>
+	<div class="btn" style="display:inline-block; font-weight:bold; background-color:orange;">변경됨(저장필요)</div>
+	<div class="btn" style="display:inline-block; font-weight:bold; background-color:#eeeeee;">읽기전용</div>
+	<div class="btn" style="display:inline-block; font-weight:bold; background-color:#cccccc;">입력조건 불충분</div>
+	<table id="subject-table" class="table table-bordered">
+		<thead>
+			<tr>
+				<th>AAID</th>
+				<th>SGID</th>
+				<th>이름</th>
+				<th>학부모</th>
+				<th>연락처</th>
+				<th>학년</th>
+				<th>반</th>
+				<th>번호</th>
+				{{ if .isAdmin }} 
+				<th>조사원</th>
+				{{ else }}
+				<th>잠금</th>
+				{{ end }}
+				<th>완료상태</th>
+				<th>비고</th>
+				<th style="min-width:200px;">비고(기타)</th>
+				<th>완료일자</th>
+				<th style="min-width:350px;">주소</th>
+				<th>우편번호</th>
+				{{ if not .isAdmin }} 
+				<th>제출여부</th>
+				<th>제출일자</th>
+				{{ end }}
+				{{ if .isAdmin }} 
+				<th>잠금</th>
+				<th>제출여부</th>
+				<th>제출일자</th>
+				<th>지급여부</th>
+				<th>지급금액</th>
+				<th>청구일자</th>
+				<th>지급일자</th>
+				{{ end }}
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="source">
+				<td data-FN="AAID" class="readonly"></td>
+				<td data-FN="SGID" class="readonly"></td>
+				<td data-FN="name" class="readonly"></td>
+				<td data-FN="par_name" class="readonly"></td>
+				<td data-FN="par_contact1" class="readonly"></td>
+				<td data-FN="grade" class="readonly"></td>
+				<td data-FN="class" class="readonly"></td>
+				<td data-FN="number" class="readonly"></td>
+				{{ if .isAdmin }} 
+				<td data-FN="AGID">
+					<select>
+						<option value=""></option>
+						{{ range .AgentList }}
+						<option value="{{ .AGID }}">{{ .Name }}</option>
+						{{ end }}
+					</select>
+				</td>
+				{{ else }}
+				<td data-FN="Lock" class="readonly">
+					<select>
+						<option value=""></option>
+						<option value="0">잠금해제</option>
+						<option value="1">잠금</option>
+					</select>
+				</td>
+				{{ end }}
+				<td data-FN="EX_STATUS">
+					<select>
+						<option value=""></option>
+						<option value="1">연락중</option>
+						<option value="2">조사완료</option>
+						<option value="3">조사불가(비고 필수)</option>
+					</select>
+				</td>
+				<td data-FN="remark">
+					<select>
+						<option value=""></option>
+						<option value="1">연락안됨</option>
+						<option value="2">조사거부</option>
+						<option value="3">연구진확인필요</option>
+						<option value="4">기타</option>
+					</select>
+				</td>
+				<td data-FN="remark_etc"><textarea></textarea></td>
+				<td data-FN="EX_DT"><input type="text" /></td>
+				<td data-FN="address"><input type="text" /></td>
+				<td data-FN="postal"><input type="text" /></td>
+				{{ if not .isAdmin }}
+				<td data-FN="SM_STATUS" class="readonly">
+					<select>
+						<option value=""></option>
+						<option value="1">미제출</option>
+						<option value="2">제출완료</option>
+					</select>
+				</td>
+				<td data-FN="SM_DT" class="readonly"><input type="text" /></td>
+				{{ end }}
+				{{ if .isAdmin }}
+				<td data-FN="Lock">
+					<select>
+						<option value=""></option>
+						<option value="0">잠금해제</option>
+						<option value="1">잠금</option>
+					</select>
+				</td>
+				<td data-FN="SM_STATUS">
+					<select>
+						<option value=""></option>
+						<option value="1">미제출</option>
+						<option value="2">제출완료</option>
+					</select>
+				</td>
+				<td data-FN="SM_DT"><input type="text" /></td>
+				<td data-FN="PAY_STATUS">
+					<select>
+						<option value=""></option>
+						<option value="1">미청구</option>
+						<option value="2">청구완료</option>
+						<option value="3">지급완료</option>
+					</select>
+				</td>
+				<td data-FN="PAY_COST"><input type="text" /></td>
+				<td data-FN="PAY_CLAIM_DT"><input type="text" /></td>
+				<td data-FN="PAY_DT"><input type="text" /></td>
+				{{ end }}
+			</tr>
+		</tbody>
+	</table>
+</body>
+{{ template "Excel.html" . }}
+<script>
+$(function() {
+	window.gExtraList = {{ .ExtraList }};
+	var allFnList = [];
+	$("#subject-table .source").find("[data-fn]:not(.readonly)").each(function() {
+		var fn = $(this).attr("data-fn");
+		if(fn != "AGID" && fn != "AAID") {
+			allFnList.push(fn);
+		}
+	});
+	
+	$(".btn-request-fixture").click(function() {
+		$.ajax({
+			url: "/api/agents/{{ .Agent.AGID }}/fixture",
+			type: "PUT",
+			success: function(res) {
+				if(res.length > 0) {
+					alert(res);
+				} else {
+					alert("신청되었습니다.");
+				}
+			}
+		})
+	});
+	
+	var excel = InitExcel($("#subject-table"));
+	excel.SaveHook = function() {
+		$(".btn-save-allocation").click();
+	};
+	
+	//{{ if .isAdmin }}
+	$("#select-school").change(function() {
+		ClearAllocationList();
+		LoadAllocationList();
+	}).val(6).change();
+	//{{ else }}
+	LoadAllocationList();
+	//{{ end }}
+	
+	function ClearAllocationList() {
+		excel.jRoot.find("tbody tr").detach();
+	}
+	
+	$(".btn-save-allocation").click(function() {
+		excel.ResetEditing();
+		UpdateAllocation.Upadting = 0;
+		$("[data-SGID]").each(function() {
+			if($(this).find(".edited").length > 0) {
+				UpdateAllocation($(this));
+			}
+		});
+	});
+	
+	$(".btn-export-allocation").click(function() {
+		location.href = "/api/agents/allocations/export";
+	});
+	
+	function UpdateAllocation(jRow) {
+		var allocation = RowToAllocation(jRow);
+		++UpdateAllocation.Upadting;
+		$.ajax({
+			url: "/api/agents/allocations/" + allocation.SGID,
+			type: "POST",
+			data: allocation,
+			success: function(res) {
+				--UpdateAllocation.Upadting;
+				if(UpdateAllocation.Upadting == 0) {
+					LoadAllocationList();
+				}
+			}
+		})
+	}
+	
+	function LoadAllocationList() {
+		var SCHOOLID = $("#select-school").val();
+		$.ajax({
+			//{{ if .isAdmin }}
+			url: "/api/agents/allocations?SCHOOLID=" + SCHOOLID,
+			//{{ else }}
+			url: "/api/agents/allocations",
+			//{{ end }}
+			type: "GET",
+			success: function(subjectList) {
+				for(var i=0; i<subjectList.length; ++i) {
+					var subject = subjectList[i];
+					var jRow = AllocationToRow(subject, excel.jRoot.find("[data-SGID='" + subject.SGID + "']"));
+					jRow.attr("data-index", i+1);
+				}
+				if(LoadAllocationList.isFirst || excel.jRoot.find(".selected").length == 0) {
+					excel.SelectCell(excel.jRoot.find("td").eq(1));
+					LoadAllocationList.isFirst = false;
+				}
+			}
+		})
+	}
+	LoadAllocationList.isFirst = true;
+	
+	function RowToAllocation(jRow) {
+		var allocation = {};
+		var jTdList = jRow.find("td");
+		allocation.AAID = jRow.attr("data-AAID");
+		allocation.SGID = jRow.attr("data-SGID");
+		var idx = 1;
+		jTdList.each(function() {
+			var jCell = $(this);
+			if(!jCell.hasClass("readonly")) {
+				var key = jCell.attr("data-FN");
+				var value = jCell.find(excel.InputSelector).val();
+				if(key != "AAID" && key != "SGID") {
+					allocation[key] = value;
+				}
+			}
+		});
+		return allocation;
+	}
+	
+	var FollowHash = {};
+	var NotifyHash = {};
+	//{{ if .isAdmin }}
+	var func_Agent = function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='AGID']").find(excel.InputSelector).val();
+		if(value == null) {
+			value = jRow.find("[data-FN='AGID']").find(excel.InputSelector).text();
+		}
+		return value.length > 0;
+	};
+	NotifyHash["AGID"] = allFnList;
+	for(var i=0; i<allFnList.length; ++i) {
+		var fn = allFnList[i];
+		FollowHash[fn] = [func_Agent];
+	}
+	//{{ else }}
+	for(var i=0; i<allFnList.length; ++i) {
+		var fn = allFnList[i];
+		FollowHash[fn] = [];
+	}
+	//{{ end }}
+	
+	//{{ if .isAdmin }}
+	NotifyHash["EX_STATUS"] = ["EX_DT", "remark", "address", "postal", "SM_STATUS"];
+	NotifyHash["Lock"] = ["SM_STATUS"];
+	//{{ else }}
+	NotifyHash["EX_STATUS"] = ["EX_DT", "remark", "address", "postal"];
+	//{{ end }}
+	
+	var func_FinishExam = function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='EX_STATUS']").find(excel.InputSelector).val();
+		return (value == 2);
+	};
+	FollowHash["EX_DT"].push(func_FinishExam);
+	FollowHash["address"].push(func_FinishExam);
+	FollowHash["postal"].push(func_FinishExam);
+	FollowHash["remark"].push(function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='EX_STATUS']").find(excel.InputSelector).val();
+		return (value == 3);
+	});
+	//{{ if .isAdmin }}
+	FollowHash["SM_STATUS"].push(func_FinishExam);
+	FollowHash["SM_STATUS"].push(function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='Lock']").find(excel.InputSelector).val();
+		return (value == 1);
+	});
+	var func_FinishSubmit = function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='SM_STATUS']").find(excel.InputSelector).val();
+		return (value == 2);
+	};
+	NotifyHash["SM_STATUS"] = ["SM_DT", "PAY_STATUS"];
+	FollowHash["SM_DT"].push(func_FinishSubmit);
+	FollowHash["PAY_STATUS"].push(func_FinishSubmit);
+	
+	var func_ClaimPay = function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='PAY_STATUS']").find(excel.InputSelector).val();
+		return (value == 2) || (value == 3);
+	};
+	var func_FinishPay = function(jCell) {
+		var jRow = jCell.parent();
+		var value = jRow.find("[data-FN='PAY_STATUS']").find(excel.InputSelector).val();
+		return (value == 3);
+	};
+	NotifyHash["PAY_STATUS"] = ["PAY_COST", "PAY_CLAIM_DT", "PAY_DT"];
+	FollowHash["PAY_COST"].push(func_ClaimPay);
+	FollowHash["PAY_CLAIM_DT"].push(func_ClaimPay);
+	FollowHash["PAY_DT"].push(func_FinishPay);
+	//{{ end }}
+	
+	function AllocationToRow(allocation, jRow) {
+		if(jRow == null || jRow.length == 0) {
+			var jRow = excel.AddRow();
+		}
+		jRow.attr("data-SGID", allocation.SGID);
+		jRow.attr("data-AAID", allocation.AAID);
+		jRow.find(".readmode").detach();
+		jRow.find(".edited").removeClass("edited");
+		
+		var jTdList = jRow.find("td");
+		jTdList.each(function() {
+			var jCell = $(this);
+			var key = jCell.attr("data-FN");
+			var value = allocation[key];
+			if(value != null && value.charAt != null && value.length == 20 && value.charAt(10) == "T" && value.charAt(19) == "Z") {
+				value = value.substr(0, 10);
+			}
+			
+			var jItem = jCell.find(excel.InputSelector);
+			if(jItem.length == 0) {
+				jCell.text(value ? value : "");
+			} else {
+				jCell.find(excel.InputSelector).val(value);
+			}
+			var notify = NotifyHash[key];
+			if(notify != null) {
+				(function(key, notify) {
+					jCell.find(excel.InputSelector).change(function() {
+						for(var i=0; i<notify.length; ++i) {
+							var nt = notify[i];
+							if(key != nt) {
+								excel.SetCellEditable($(this).parent().parent().find("[data-FN='" + nt + "']"), false, {UnchangeSelect: true});
+							}
+						}
+					});
+				})(key, notify)
+			}
+			var followList = FollowHash[key];
+			if(followList != null) {
+				jCell.data("followList", followList);
+			}
+		});
+		
+		//{{ if not .isAdmin }}
+		if(allocation.Lock == 1) {
+			jTdList.addClass("readonly");
+		}
+		//{{ else }}
+		if(allocation.EX_STATUS == null) {
+			jTdList.filter(":not([data-FN='AGID'])").addClass("readonly");
+		} else {
+			jTdList.filter("[data-FN='EX_STATUS']").addClass("readonly");
+			jTdList.filter("[data-FN='AGID']").addClass("readonly");
+			jTdList.filter("[data-FN='remark']").addClass("readonly");
+			jTdList.filter("[data-FN='remark_etc']").addClass("readonly");
+			jTdList.filter("[data-FN='EX_DT']").addClass("readonly");
+			jTdList.filter("[data-FN='address']").addClass("readonly");
+			jTdList.filter("[data-FN='postal']").addClass("readonly");
+		}
+		//{{ end }}
+		
+		excel.RefreshRow(jRow);
+		return jRow;
+	}
+})
+</script>
+</html>

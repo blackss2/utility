@@ -1,8 +1,91 @@
 package database
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
+	"sort"
+	"strings"
+	"text/template"
 )
+
+type Applyer interface {
+	Apply(data map[string]interface{}, key string, value interface{}) bool
+}
+
+type ConfigMaker interface {
+	Init(data map[string]interface{})
+	TemplateString() string
+	Applyer
+}
+
+type Config struct {
+	driver  string
+	applyer Applyer
+	tp      *template.Template
+	data    map[string]interface{}
+}
+
+func newConfig(driver string, ap Applyer, templateString string) *Config {
+	t, err := template.New("_").Parse(templateString)
+	if err != nil {
+		panic(err)
+	}
+	c := &Config{
+		driver:  driver,
+		applyer: ap,
+		tp:      t,
+		data:    make(map[string]interface{}),
+	}
+	return c
+}
+
+func (c *Config) Set(key string, value interface{}) *Config {
+	if !c.applyer.Apply(c.data, key, value) {
+		log.Fatalln("unacceptable data", key, value)
+	}
+	return c
+}
+
+func (c *Config) Json(data string) *Config {
+	hash := make(map[string]interface{})
+	err := json.Unmarshal([]byte(data), &hash)
+	if err != nil {
+		log.Fatalln(err, data)
+	} else {
+		for k, v := range hash {
+			c.applyer.Apply(c.data, k, v)
+		}
+	}
+	return c
+}
+
+func (c *Config) ConnectionString() string {
+	var buffer bytes.Buffer
+	c.tp.Execute(&buffer, c.data)
+	return buffer.String()
+}
+
+func (c *Config) Open(poolsize int) *DBPool {
+	conn := c.ConnectionString()
+	return CreateDBPoolByConnString(c.driver, conn, poolsize)
+}
+
+var gDriverHash map[string]ConfigMaker = make(map[string]ConfigMaker)
+
+func AddDriver(driver string, cm ConfigMaker) {
+	gDriverHash[strings.ToLower(driver)] = cm
+}
+
+func SupportDrivers() []string {
+	list := make([]string, len(gDriverHash))
+	for k, _ := range gDriverHash {
+		list = append(list, k)
+	}
+	sort.Strings(list)
+	return list
+}
 
 type DBPool struct {
 	driver      string
@@ -13,27 +96,15 @@ type DBPool struct {
 	IsForceUTF8 bool
 }
 
-func CreateDBPool(driver string, ip string, port int, name string, id string, pw string, poolSize int) *DBPool {
-	var connString string
-	switch driver {
-	case "mssql":
-		timeout := 300
-		connString = fmt.Sprintf("Server=%s;Port=%d;Database=%s;User Id=%s;Password=%s;connection timeout=%d", ip, port, name, id, pw, timeout)
-	case "mysql":
-		connString = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", id, pw, ip, port, name)
-	case "mymysql":
-		connString = fmt.Sprintf("tcp:%s:%d*%s/%s/%s", ip, port, name, id, pw)
-	case "odbc":
-		connString = fmt.Sprintf("DSN=%s;UID=%s;PWD=%s", name, id, pw)
-	case "postgres":
-		timeout := 300
-		connString = fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s connect_timeout=%d", ip, port, name, id, pw, timeout)
-	//case "ql":
-	//	connString = name
-	default:
-		panic("Unsupported driver : " + driver)
+func NewPool(driver string) *Config {
+	cm, has := gDriverHash[strings.ToLower(driver)]
+	if !has {
+		log.Fatalln("not supported driver", driver)
+		return nil
 	}
-	return CreateDBPoolByConnString(driver, connString, poolSize)
+	c := newConfig(driver, cm, cm.TemplateString())
+	cm.Init(c.data)
+	return c
 }
 
 func CreateDBPoolByConnString(driver string, connString string, poolSize int) *DBPool {
