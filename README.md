@@ -39,7 +39,8 @@ using driver
 mssql : "github.com/denisenkom/go-mssqldb"
 mysql :	"github.com/go-sql-driver/mysql"
 mymysql : "github.com/ziutek/mymysql/godrv"
-
+odbc : "github.com/alexbrainman/odbc"
+postgres : "github.com/lib/pq"
 - Usage
 [renew]
 -- Call chain
