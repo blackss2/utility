@@ -39,13 +39,87 @@ using driver
 mssql : "github.com/denisenkom/go-mssqldb"
 mysql :	"github.com/go-sql-driver/mysql"
 mymysql : "github.com/ziutek/mymysql/godrv"
-
+odbc : "github.com/alexbrainman/odbc"
+postgres : "github.com/lib/pq"
 - Usage
+[renew]
+-- Call chain
+cfg := database.NewPool("postgres").Set("ip", "127.0.0.1").Set("db", "dbname").Set("user", "admin").Set("pw", "password").Set("ssl", "disable")
+dbPool := cfg.Open(10) //10 : poolsize
+
+-- Multiple attribute name support(ignore case)
+cm.AddKey(reflect.String, "Address", "Addr", "IP")
+cm.AddKey(reflect.Int, "Port")
+cm.AddKey(reflect.String, "Database", "db", "dbname")
+cm.AddKey(reflect.String, "Id", "UserId", "User")
+cm.AddKey(reflect.String, "Password", "pw", "passwd")
+cm.AddKey(reflect.Int, "Timeout")
+cm.AddKey(reflect.String, "SSL", "sslmode")
+
+database.NewPool("postgres").Set("Address", "127.0.0.1")
+database.NewPool("postgres").Set("addr", "127.0.0.1")
+database.NewPool("postgres").Set("ip", "127.0.0.1")
+
+-- Support JSON
+database.NewPool("postgres").Json(`{
+	"ip": "127.0.0.1",
+	"db": "dbname",
+	"user": "admin",
+	"pw": "password",
+	"ssl": "disable"
+}`)
+
+[legacy]
 database.CreateDBPool(DBTYPE, IP_ADDRESS, PORT, DBNAME, ID, PASSWORD, POOLSIZE)
 
 (ex)
 </pre>
 <pre>
+[renew]
+package main
+
+import (
+	"fmt"
+	"utility/database"
+)
+
+func main() {
+	cfg := database.NewPool("postgres").Json(`{
+		"ip": "127.0.0.1",
+		"db": "dbname",
+		"user": "admin",
+		"pw": "password",
+		"ssl": "disable"
+	}`)
+	fmt.Println(cfg.ConnectionString())
+	dbPool := cfg.Open(10)
+	db := dbPool.GetDB()
+	defer dbPool.ReleaseDB(db)
+
+	rows, err := db.Query(`
+		/*
+		CREATE TABLE s_user (
+			UID SERIAL primary key,
+			userid varchar(4),
+			userpw varchar(256)
+		)
+		*/
+		/*
+		INSERT INTO s_user (userid, userpw) VALUES ('Test', 'abcd')
+		*/
+		SELECT * FROM s_user
+	`)
+	if err != nil {
+		panic(err)
+	} else {
+		for rows.Next() {
+			row := rows.FetchArray()
+			fmt.Println(row)
+		}
+	}
+}
+
+[legacy]
 import (
 	"github.com/blackss2/utility/database"
 	"fmt"
