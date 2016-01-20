@@ -57,7 +57,6 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 	rows := &Rows{nil, true, false, make([]string, 0, 100), db.isForceUTF8}
 
 	QUERYSTR := strings.ToUpper(queryStr)
-
 	if db.inst != nil {
 		stmt, err := db.inst.Prepare(queryStr)
 		if stmt != nil {
@@ -102,6 +101,42 @@ func (db *Database) Query(queryStr string) (*Rows, error) {
 		}
 	}
 	return rows, nil
+}
+
+func (db *Database) MutipleQuery(queryList []string) error {
+	if db.inst != nil {
+		tx, err := db.inst.Begin()
+		if err != nil {
+			db.Close()
+			db.executeOpen()
+			return err
+		}
+		splitCnt := 1000
+		cnt := len(queryList) / splitCnt
+		if len(queryList)%splitCnt != 0 {
+			cnt++
+		}
+		for i := 0; i < cnt; i++ {
+			inBound := i * splitCnt
+			outBound := (i + 1) * splitCnt
+			if outBound > len(queryList) {
+				outBound = len(queryList)
+			}
+			_, err = tx.Exec(strings.Join(queryList[inBound:outBound], "\n"))
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		err = tx.Commit()
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	} else {
+		return errors.New("db is not initialized")
+	}
+	return nil
 }
 
 func (db *Database) TempQuery(queryStr string) (*Rows, error) {
