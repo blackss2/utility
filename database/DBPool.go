@@ -72,6 +72,15 @@ func (c *Config) Open(poolsize int) *DBPool {
 	return CreateDBPoolByConnString(c.driver, conn, poolsize)
 }
 
+func (c *Config) OpenDirect() *Database {
+	db := new(Database)
+	err := db.Open(c.driver, c.ConnectionString())
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
 var gDriverHash map[string]ConfigMaker = make(map[string]ConfigMaker)
 
 func AddDriver(driver string, cm ConfigMaker) {

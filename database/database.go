@@ -26,6 +26,8 @@ func (db *Database) Open(driver string, connString string) error {
 }
 
 func (db *Database) executeOpen() error {
+	db.Close()
+
 	var err error
 	db.inst, err = sql.Open(db.driver, db.connString)
 	if err == nil && len(db.postConnect) > 0 {
@@ -41,6 +43,7 @@ func (db *Database) Close() error {
 
 	if db.inst != nil {
 		err = db.inst.Close()
+		db.inst = nil
 	}
 	return err
 }
