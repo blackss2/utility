@@ -141,7 +141,9 @@ func Time(val interface{}) *time.Time {
 	if val != nil {
 		v := String(val)
 		if len(v) > 0 {
-			if t, err := time.Parse("2006-01-02 15:04:05.000", v); err == nil && t.Year() > 0 {
+			if t, err := time.Parse(time.RFC3339, v); err == nil && t.Year() > 0 {
+				return &t
+			} else if t, err := time.Parse("2006-01-02 15:04:05.000", v); err == nil && t.Year() > 0 {
 				return &t
 			} else if t, err := time.Parse("2006-01-02 15:04:05", v); err == nil && t.Year() > 0 {
 				return &t
