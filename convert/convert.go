@@ -145,32 +145,23 @@ func Time(val interface{}) *time.Time {
 				return &t
 			} else if t, err := time.Parse(time.RFC3339, v); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("2006-01-02 15:04:05.000", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("2006-01-02 15:04:05.000", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("2006-01-02 15:04:05", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("2006-01-02 15:04:05", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("2006-01-02", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("2006-01-02", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("20060102150405", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("20060102150405", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("20060102", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("20060102", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("01-02-06", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("01-02-06", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("01-02-2006", v); err == nil && t.Year() > 0 {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("01-02-2006", v, time.Local); err == nil && t.Year() > 0 {
 				return &t
-			} else if t, err := time.Parse("15:04:05.000", v); err == nil {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("15:04:05.000", v, time.Local); err == nil {
 				return &t
-			} else if t, err := time.Parse("15:04:05", v); err == nil {
-				t = t.In(time.Local)
+			} else if t, err := time.ParseInLocation("15:04:05", v, time.Local); err == nil {
 				return &t
 			}
 		}
