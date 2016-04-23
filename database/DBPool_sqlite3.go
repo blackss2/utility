@@ -16,5 +16,5 @@ func init() {
 		`, "\n", "", -1), "\t", "", -1),
 	}
 	cm.AddKey(reflect.String, "Path")
-	AddDriver("sqlite", cm)
+	AddDriver("sqlite3", cm)
 }
