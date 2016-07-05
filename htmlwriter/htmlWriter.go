@@ -87,6 +87,10 @@ func (n *HtmlNode) SetText(text string) *HtmlNode {
 	return n
 }
 
+func (n *HtmlNode) Text() string {
+	return n.text
+}
+
 func (n *HtmlNode) String() string {
 	var buffer bytes.Buffer
 	n.Write(&buffer)
