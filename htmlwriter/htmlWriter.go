@@ -65,6 +65,15 @@ func (c *HtmlNode) AppendTo(n *HtmlNode) *HtmlNode {
 	return c
 }
 
+func (n *HtmlNode) Prepend(c *HtmlNode) *HtmlNode {
+	if c.parents != nil {
+		c.Detach()
+	}
+	n.child = append([]*HtmlNode{c}, n.child...)
+	c.parents = n
+	return n
+}
+
 func (n *HtmlNode) Detach() *HtmlNode {
 	return n.parents.Remove(n)
 }
